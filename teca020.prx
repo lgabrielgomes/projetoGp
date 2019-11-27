@@ -1,0 +1,1813 @@
+#Include 'Protheus.ch'
+#INCLUDE "TECA020.CH"
+#INCLUDE 'FWMVCDEF.CH'
+
+//Itens Funcionarios
+#DEFINE P_FILIAL			1
+#DEFINE P_MAT				2
+#DEFINE P_NOME				3
+#DEFINE P_CARGO			4
+#DEFINE P_DESCARG			5
+#DEFINE P_FUNCAO			6
+#DEFINE P_TURNO			7
+#DEFINE P_CC				8
+#DEFINE P_DESFUNC			9
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³FunCAo    ³ TECA020  ³ Autor ³ Vendas e CRM          ³ Data ³ 13/02/12 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³ Programa de Manutencao no Cadastro de Tecnicos             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Function TECA020(nOpcAuto,xRotAuto)
+Local oBrowse
+
+Default nOpcAuto := 0
+Default xRotAuto := Nil
+
+If ValType(xRotAuto) <> "A"
+	oBrowse := FWMBrowse():New()
+	oBrowse:SetAlias('AA1')
+	oBrowse:SetDescription(STR0001) // Cadastro de Tecnicos
+	oBrowse:DisableDetails()
+	oBrowse:Activate()
+Else 
+	If TYPE("aRotina") != 'A'
+		aRotina := MenuDef()
+	EndIf
+	FWMVCRotAuto(ModelDef(),"AA1",nOpcAuto,{{"AA1MASTER",xRotAuto}})
+EndIf
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³MenuDef   ³ Autor ³ Vendas CRM		    ³ Data ³ 13/02/2012³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³Funcao de definicao do aRotina                               ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³aRotina   retorna a array com lista de aRotina               ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³TECA020                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+Static Function MenuDef()
+Local aMenu:={}
+
+aAdd(aMenu,{ STR0015, 'VIEWDEF.TECA020', 0 , 2, 0, .T. } ) // 'Visualizar'
+aAdd(aMenu,{ STR0016, 'VIEWDEF.TECA020', 0, 3, 0, .T. } ) // 'Incluir'
+aAdd(aMenu,{ STR0017, 'VIEWDEF.TECA020', 0, 4, 0, .T. } ) // 'Alterar'
+aAdd(aMenu,{ STR0018, 'VIEWDEF.TECA020', 0, 5, 0, .T. } ) // 'Excluir'
+aAdd(aMenu,{ STR0019, 'VIEWDEF.TECA020', 0, 8, 0, .T. } ) // 'Imprimir'
+aAdd(aMenu,{ STR0020, 'VIEWDEF.TECA020', 0, 9, 0, .T. } ) // 'Copiar'
+aAdd(aMenu,{ STR0021,'At020ImpFnc',0, 3, 0, .T.})//"Importação de Funcionários"
+
+Return aMenu
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ModelDef  º Autor ³ Vendas CRM         º Data ³ 13/02/2012  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Define o modelo de dados (MVC)                              º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³TECA020                                                     º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+ 
+Static Function ModelDef()
+Static oModel
+Local oStruAA1		:= FWFormStruct(1,'AA1',/*bAvalCampo*/,/*lViewUsado*/)
+Local bCommit		:= {|oMdl|At020VlMVC(oMdl)}		//Funcao a ser executada no momento da exclusao
+Local bPosValidacao	:= {||At020VdVis() .And. At020TdInp()}
+Local aAux			:= {}
+Local aAux1			:= {}
+Local aAux2			:= {}
+Local aAux3			:= {}
+Local aAux4			:= {}
+Local aAux5			:= {}
+Local lImpFunc 		:= IsInCallStack('At020ImpFnc') //Importação de funcionário.
+
+aAux := FwStruTrigger("AA1_CDFUNC","AA1_TURNO","At020Desc()",.F.,Nil,Nil,Nil)
+oStruAA1:AddTrigger(aAux[1],aAux[2],aAux[3],aAux[4])
+
+aAux1 := FwStruTrigger("AA1_CDFUNC","AA1_CC","At020DesCC()",.F.,Nil,Nil,Nil)
+oStruAA1:AddTrigger(aAux1[1],aAux1[2],aAux1[3],aAux1[4])
+
+aAux2 := FwStruTrigger("AA1_CDFUNC","AA1_FUNFIL","At020Filial()",.F.,Nil,Nil,Nil)
+oStruAA1:AddTrigger(aAux2[1],aAux2[2],aAux2[3],aAux2[4])
+
+aAux3 := FwStruTrigger("AA1_CDFUNC","AA1_NOMTEC","At020Nome()",.F.,Nil,Nil,Nil)
+	oStruAA1:AddTrigger(aAux3[1],aAux3[2],aAux3[3],aAux3[4])
+
+aAux4 := FwStruTrigger("AA1_CDFUNC","AA1_SEQTUR","At020SeqTr()",.F.,Nil,Nil,Nil)
+	oStruAA1:AddTrigger(aAux4[1],aAux4[2],aAux4[3],aAux4[4])
+	
+aAux5 := FwStruTrigger("AA1_CDFUNC","AA1_FUNCAO","At020Funcao()",.F.,Nil,Nil,Nil)
+	oStruAA1:AddTrigger(aAux5[1],aAux5[2],aAux5[3],aAux5[4])
+
+oModel := MPFormModel():New('TECA020',/*bPreValidacao*/,bPosValidacao,bCommit,/*bCancel*/)
+oModel:AddFields('AA1MASTER',/*cOwner*/,oStruAA1,/*bPreValidacao*/,/*bPosValidacao*/,/*bCarga*/)
+oModel:SetDescription(STR0001)
+If nModulo == 28 
+	//Tira a obrigatoriedade dos campos somente quando for executado o SIGATEC.
+	oStruAA1:SetProperty( 'AA1_EMINFI' , MODEL_FIELD_OBRIGAT, .F.)
+	oStruAA1:SetProperty( 'AA1_FUNPRO' , MODEL_FIELD_OBRIGAT, .F.)
+	oStruAA1:SetProperty( 'AA1_LIBOSV' , MODEL_FIELD_OBRIGAT, .F.)
+	oStruAA1:SetProperty( 'AA1_REQPEC' , MODEL_FIELD_OBRIGAT, .F.)
+	oStruAA1:SetProperty( 'AA1_CODVEN' , MODEL_FIELD_OBRIGAT, .F.)
+	oStruAA1:SetProperty( 'AA1_NOMUSU' , MODEL_FIELD_OBRIGAT, .F.)
+	
+	//caloca a obrigatoriedade dos campos somente quando for executado o SIGATEC.
+	oStruAA1:SetProperty( 'AA1_TURNO' , MODEL_FIELD_OBRIGAT , .T.)
+	
+	if lImpFunc
+		oStruAA1:SetProperty( 'AA1_SEQTUR' , MODEL_FIELD_OBRIGAT, .F.)
+		oStruAA1:SetProperty( 'AA1_ESCALA' , MODEL_FIELD_OBRIGAT, .F.)
+	Else
+		oStruAA1:SetProperty( 'AA1_SEQTUR' , MODEL_FIELD_OBRIGAT, .T.)
+		oStruAA1:SetProperty( 'AA1_ESCALA' , MODEL_FIELD_OBRIGAT, .T.)
+	Endif
+EndIf
+
+Return(oModel)
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ViewDef   º Autor ³ Vendas CRM         º Data ³  13/02/2012 º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Define a interface para cadastro em MVC.                    º±±
+±±º          ³                                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³TECA020                                                     º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Static Function ViewDef()
+
+Local oView
+Local oModel   := FWLoadModel('TECA020')
+Local oStruAA1 := FWFormStruct(2,'AA1')
+
+oView := FWFormView():New()
+oView:SetModel(oModel)
+oView:AddField('VIEW_AA1', oStruAA1,'AA1MASTER')
+oView:CreateHorizontalBox('TELA',100)
+oView:SetOwnerView('VIEW_AA1','TELA')
+oView:AddUserButton("Histórico Disciplinar", 'CLIPS',{|oView| At020Disci(FwFldGet("AA1_CODTEC"))}) 
+
+Return(oView)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³At020VlDel³ Autor ³VENDAS E CRM           ³ Data ³ 13/02/12 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³ Validacao da Exclusao do Tecnico                           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ ExpL1: Logico                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ Nenhum                                                     ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao Efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function At020VlMVC(oMdl)
+ 
+local lRetorno 	:= .T.
+Local nOpc 		:= oMdl:GetOperation() 
+Local oModel744	:= Nil
+Local oModelTFJ	:= Nil
+Local oSubTFL	:= Nil
+Local oSubTFF	:= Nil
+Local cCodTFJ	:= SuperGetMv("MV_GSORCRE",,"")
+Local cCodProd	:= SuperGetMv("MV_GSPRDRE",,"")
+Local cCodFUN	:= SuperGetMv("MV_GSFUNRE",,"")
+Local cCodTES	:= SuperGetMv("MV_GSTESRE",,"")
+Local lIncTFF	:= .F.
+Local cEscala 	:= oMdl:GetModel("AA1MASTER"):GetValue("AA1_ESCALA")
+Local cFaltFix	:= oMdl:GetModel("AA1MASTER"):GetValue("AA1_FALTFX")
+Local nItem 	:= 0
+Local cItem 	:= ""
+Local cCodFunc	:= oMdl:GetModel("AA1MASTER"):GetValue("AA1_CDFUNC")
+Local cTipAfast	:= SuperGetMv("MV_TPAFAST",.F.,"014")
+Local oMdlTW5	:= Nil
+Local oModelAfa := Nil
+Local oMdlSR8   := Nil
+Local nX		:= 0
+Local cCodTec	:= oMdl:GetModel("AA1MASTER"):GetValue("AA1_CODTEC")
+
+Begin Transaction
+	
+	If nOpc == MODEL_OPERATION_DELETE 	
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Verifica na Amarracao Cliente X Eqto                                   ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If ( lRetorno )
+			dbSelectArea("AA3")
+			dbSetOrder(5)
+			If ( dbSeek(xFilial("AA3")+AA1->AA1_CODTEC) )
+				Help(" ",1,"AT020DEL01")
+				lRetorno := .F.
+			EndIf
+		EndIf
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Verifica no Apontamento Tecnico                                        ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If ( lRetorno )
+			dbSelectArea("AB9")
+			dbSetOrder(3)
+			If ( dbSeek(xFilial("AB9")+AA1->AA1_CODTEC) )
+				Help(" ",1,"AT020DEL02")
+				lRetorno := .F.
+			EndIf
+		EndIf
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Verifica na Agenda do Tecnico                                          ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If ( lRetorno )
+			dbSelectArea("ABB")
+			dbSetOrder(1)
+			If ( dbSeek(xFilial("ABB")+AA1->AA1_CODTEC) )
+				Help(" ",1,"AT020DEL03")
+				lRetorno := .F.
+			EndIf
+		EndIf
+		     
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Verifica nas habilidades do tecnico                                    ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If ( lRetorno )
+			dbSelectArea("AA2")
+			dbSetOrder(1)
+			If ( dbSeek(xFilial("AA2")+AA1->AA1_CODTEC) )
+				Help(" ",1,"HELP", , STR0002, 3, 1 )  //"Nao e possivel a exclusao de um tecnico vinculado a uma habilidade"
+				lRetorno := .F.
+			EndIf
+		EndIf
+	Else
+		If !Empty(cEscala)
+			lIncTFF := At020Reser(cCodTFJ,cEscala)//FUNÇÃO QUE VERIFICA SE EXISTE TFF
+		
+			If lIncTFF // chamada do model TECA744 para adicionar TFF com a escala
+				DbSelectArea("TFJ")
+				TFJ->(DbSetOrder(1))//TFJ_FILIAL+TFJ_CODIGO
+				If TFJ->(DbSeek(xFilial("TFJ")+cCodTFJ))
+					oModel744 := FwLoadModel("TECA744")
+					oModel744:SetOperation( MODEL_OPERATION_UPDATE )
+					oModel744:Activate()
+					
+					oModelTFJ 	:= oModel744:GetModel("TFJ_REFER")
+					oSubTFL 	:= oModel744:GetModel("TFL_LOC")
+					oSubTFF 	:= oModel744:GetModel("TFF_RH")
+					nItem 		:= oSubTFF:Length()
+					oSubTFF:Goline(nItem)
+					cItem		:= Soma1(oSubTFF:GetValue("TFF_ITEM")) 
+					
+					oSubTFF:AddLine()
+					oSubTFF:SetValue("TFF_ITEM",	cItem 	 ) 
+					oSubTFF:SetValue("TFF_PRODUT",	cCodProd ) 
+					oSubTFF:SetValue("TFF_QTDVEN",	9999	 ) 
+					oSubTFF:SetValue("TFF_PRCVEN", 	0.01	 ) 
+					oSubTFF:SetValue("TFF_ESCALA", 	cEscala	 ) 
+					oSubTFF:SetValue("TFF_FUNCAO", 	cCodFUN	 ) 
+					oSubTFF:SetValue("TFF_TESPED", 	cCodTES	 )
+					oSubTFF:SetValue("TFF_PERINI", 	oSubTFL:GetValue("TFL_DTINI")) 
+					oSubTFF:SetValue("TFF_PERFIM", 	oSubTFL:GetValue("TFL_DTFIM"))  
+					oSubTFF:LoadValue("TFF_COBCTR",	"2")
+					
+					At740SCmt( .T. )
+
+					If !(oModel744:VldData() .And. oModel744:CommitData())
+						cLog := cValToChar(oModel744:GetErrorMessage()[4]) + ' - '
+						cLog += cValToChar(oModel744:GetErrorMessage()[5]) + ' - '
+						cLog += cValToChar(oModel744:GetErrorMessage()[6])
+						oMdl:GetModel():SetErrorMessage( oMdl:GetId(),"",oMdl:GetId(), "", "NOESCALA",  cLog,"" )
+					    lRetorno := .F.
+					EndIf
+					
+					At740SCmt(.F.)
+
+					oModel744:DeActivate()
+					oModel744:Destroy()
+					oModel744:= Nil
+				EndIf
+			Endif
+		EndIf
+
+		If cFaltFix == "2" .And. !Empty(cCodFunc)
+
+			cAliasTW5 := GetNextAlias()
+
+			BeginSql Alias cAliasTW5
+				SELECT *, TW5.R_E_C_N_O_ AS RECNOTW5
+				FROM %table:TW5% TW5
+				WHERE TW5.TW5_FILIAL = %xFilial:TW5%
+			      AND TW5.TW5_ATDCOD = %Exp:cCodTec%
+				  AND TW5.TW5_TPLANC = '7'
+			  	  AND %Exp:dDataBase% >= TW5.TW5_DTINI AND TW5.TW5_DTFIM=%Exp:''%
+			      AND TW5.%NotDel%
+			EndSql
+
+			If (cAliasTW5)->(!EOF())
+
+				//Alteração de ausencia no GS.
+				TW5->(DbGoTo((cAliasTW5)->(RECNOTW5)))
+				oMdlTW5 := FwLoadModel("TECA336A")
+
+				If (cAliasTW5)->TW5_DTINI == Dtos(dDataBase)
+					oMdlTW5:SetOperation(MODEL_OPERATION_DELETE)
+				Else
+					oMdlTW5:SetOperation(MODEL_OPERATION_UPDATE)
+				Endif
+
+				If oMdlTW5:Activate()
+
+					If oMdlTW5:GetOperation() <> MODEL_OPERATION_DELETE
+						oMdlTW5:SetValue("TW5MASTER","TW5_DTFIM", dDataBase-1)
+					Endif
+					
+					If !(oMdlTW5:VldData() .And. oMdlTW5:CommitData())
+						cLog := cValToChar(oMdlTW5:GetErrorMessage()[4]) + ' - '
+						cLog += cValToChar(oMdlTW5:GetErrorMessage()[5]) + ' - '
+						cLog += cValToChar(oMdlTW5:GetErrorMessage()[6])
+						oMdl:GetModel():SetErrorMessage( oMdl:GetId(),"",oMdl:GetId(), "", "AUSENCIA",  cLog,"" )
+					    lRetorno := .F.
+					EndIf
+
+					oMdlTW5:DeActivate()
+					oMdlTW5:Destroy()
+
+					If lRetorno
+						SRA->(DbSetOrder(1))
+						SRA->(dbSeek(xFilial("SRA")+cCodFunc))
+					
+						oModelAfa	:= FWLoadModel('GPEA240')
+				
+						//variavel usada no gpea240
+						Private aPerAtual 	:= {} 
+						Private aAutoCab	:= {}
+						Private aAutoItens	:= {}
+						Private cProcesso	:= ""
+						Private nColPro	 	:= 2
+						Private aSR8Respal  := {}
+
+						//Alteração de ausencia no RH.
+						oModelAfa:SetOperation(MODEL_OPERATION_UPDATE)
+						
+						If oModelAfa:Activate()
+							
+							oMdlSR8 := oModelAfa:GetModel("GPEA240_SR8")
+							
+							For nX:= 1 To oMdlSR8:Length()
+								oMdlSR8:GoLine(nX)
+								If oMdlSR8:GetValue("R8_TIPOAFA") == cTipAfast .And. dDataBase >= oMdlSR8:GetValue('R8_DATAINI') .And. oMdlSR8:GetValue('R8_DATAFIM') == Ctod("")
+
+									If oMdlSR8:GetValue('R8_DATAINI') == dDataBase
+										oMdlSR8:DeleteLine()
+									Else
+										oMdlSR8:SetValue('R8_DATAFIM',	dDataBase-1)
+									Endif
+
+									Exit
+
+								Endif
+							Next nX		
+							
+							If oModelAfa:VldData()
+								oModelAfa:CommitData()
+							EndIf
+
+							lRetorno := lRetorno .And. oMdl:GetModel("AA1MASTER"):SetValue("AA1_ALOCA","1")
+
+						Endif
+
+						oModelAfa:DeActivate()
+						oModelAfa:Destroy()
+	
+					Endif
+				Endif
+			Endif
+		Endif
+	EndIf
+	If lRetorno
+		lRetorno:= FWFormCommit( oMdl )
+	EndIf
+	If !lRetorno
+		DisarmTransacation()
+	EndIf
+End Transaction
+	
+Return(lRetorno)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³At020VlDel³ Autor ³ Eduardo Riera         ³ Data ³ 04.11.98 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³ Validacao da Exclusao do Tecnico                           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ ExpL1: Logico                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ Nenhum                                                     ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao Efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Function At020VlDel()
+
+
+local lRetorno := .T.
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica na Amarracao Cliente X Eqto                                   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If ( lRetorno )
+	dbSelectArea("AA3")
+	dbSetOrder(5)
+	If ( dbSeek(xFilial("AA3")+AA1->AA1_CODTEC) )
+		Help(" ",1,"AT020DEL01")
+		lRetorno := .F.
+	EndIf
+EndIf
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica no Apontamento Tecnico                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If ( lRetorno )
+	dbSelectArea("AB9")
+	dbSetOrder(3)
+	If ( dbSeek(xFilial("AB9")+AA1->AA1_CODTEC) )
+		Help(" ",1,"AT020DEL02")
+		lRetorno := .F.
+	EndIf
+EndIf
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica na Agenda do Tecnico                                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If ( lRetorno )
+	dbSelectArea("ABB")
+	dbSetOrder(1)
+	If ( dbSeek(xFilial("ABB")+AA1->AA1_CODTEC) )
+		Help(" ",1,"AT020DEL03")
+		lRetorno := .F.
+	EndIf
+EndIf
+     
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica nas habilidades do tecnico                                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If ( lRetorno )
+	dbSelectArea("AA2")
+	dbSetOrder(1)
+	If ( dbSeek(xFilial("AA2")+AA1->AA1_CODTEC) )
+		Help(" ",1,"HELP", , STR0002, 3, 1 )  //"Nao e possivel a exclusao de um tecnico vinculado a uma habilidade"
+		lRetorno := .F.
+	EndIf
+EndIf
+
+Return(lRetorno)
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³At020VdVisº Autor ³ Vendas CRM         º Data ³ 11/07/2012  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Verifica se o vistoriador esta associado a um usuario do    º±±
+±±º			 ³Sistema.                           						  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³TECA020                                                     º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Function At020VdVis() 
+   
+Local lRetorno	:= .T.
+Local cCodUsr	:= FwFldGet("AA1_CODUSR")
+Local cVistor	:= FwFldGet("AA1_VISTOR")
+
+
+If cVistor == "1" .AND. Empty(cCodUsr)
+	Help("",1,"AT020VUSR") 
+	lRetorno := .F.
+EndIf 
+
+Return(lRetorno)     
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³At020VdVisº Autor ³ Vendas CRM         º Data ³ 06/08/2012  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Verifica se o vistoriador esta associado a um usuario do    º±±
+±±º			 ³Sistema.(Formulario nao MVC)		                          º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³TECA020                                                     º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Function At020VdVst() 
+   
+Local lRetorno	:= .T.
+
+If M->AA1_VISTOR == "1" .AND. Empty(M->AA1_CODUSR)
+	Help("",1,"AT020VUSR") 
+	lRetorno := .F.
+EndIf 
+
+Return(lRetorno)
+
+/*                               
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³At020Desc   º Autor ³ Vendas CRM     º Data ³ 19/10/12º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Gatilho do Turno									         º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³TECA020                                               º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function At020Desc()
+Local cCodTur	:= ""
+Local aArea	:= GetArea()
+
+cCodTur := Alltrim( Posicione("SRA",1,xFilial("SRA")+FwFldGet("AA1_CDFUNC"),"RA_TNOTRAB") )
+
+RestArea(aArea)
+
+Return( cCodTur )
+
+/*                               
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³At020Desc   º Autor ³ Vendas CRM     º Data ³ 19/10/12º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Gatilho do Centro de Custo						         º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³TECA020                                               º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function At020DesCC()
+Local cCodCC	:= ""
+Local aArea	:= GetArea()
+
+cCodCC := Alltrim( Posicione("SRA",1,xFilial("SRA")+FwFldGet("AA1_CDFUNC"),"RA_CC") )
+
+RestArea(aArea)
+
+Return( cCodCC )
+
+/*                               
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³At020VLFun   º Autor ³ Vendas CRM    º Data ³ 19/10/12º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ Validação dos campos AA1_TURNO e AA1_CC 			     º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³TECA020                                               º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function At020VLFun(nOption) 
+Local cCodCC		:= ""
+Local cCodTur		:= ""
+Local lRetorno 	:= .F.
+
+If !Empty(FwFldGet("AA1_CDFUNC"))
+
+	If nOption == 1
+		cCodCC := Alltrim( Posicione("SRA",1,xFilial("SRA")+FwFldGet("AA1_CDFUNC"),"RA_CC") )
+		If Alltrim(FwFldGet("AA1_CC")) == cCodCC
+			lRetorno := .T.
+		EndIf 
+	Else
+		cCodTur := Alltrim( Posicione("SRA",1,xFilial("SRA")+FwFldGet("AA1_CDFUNC"),"RA_TNOTRAB") )
+		If Alltrim(FwFldGet("AA1_TURNO")) == cCodTur
+			lRetorno := .T.
+		EndIf 
+	EndiF
+Else
+	lRetorno := .T.	
+EndIf
+
+If !lRetorno .AND. nOption == 1
+	HELP(' ',1,'AT020CC')
+ElseIf !lRetorno .AND. nOption == 2
+	HELP(' ',1,'AT020TURNO')	
+EndIf	
+
+
+Return( lRetorno )
+
+/*                               
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³At020VLFun   º Autor ³ Vendas CRM    º Data ³ 19/10/12º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ Validação do campo AA1_MPONTO						º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³TECA020                                               º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function At020VLMarc()
+
+Local cConteudo	:= &(ReadVar())		// Variavel corrente que esta sendo editada.
+Local lRet		:= .T. 					// Retorno da validacao.
+
+If !Empty(FwFldGet("AA1_MPONTO"))
+	If  ( FwFldGet("AA1_MPONTO") == "1" .AND. Empty(FwFldGet("AA1_CDFUNC")) )
+
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³	 Problema: Não será possível marcar ponto sem a seleção de funcionario. ³	
+		//³	 Solucao: Selecione um funcionario para o atendente.                    ³	
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		Help("",1,"AT020MPONTO")
+		lRet := .F.
+	EndIf	
+EndIf		                                                       
+		 
+
+Return ( lRet )       
+
+/*                               
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³At020Desc º Autor ³ Vendas CRM      º Data ³ 19/10/12 º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Gatilho do Centro de Custo						    º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³TECA020                                               º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Function At020Filial()
+Local cCodFil	:= ""
+Local aArea	:= GetArea()
+
+cCodFil := Alltrim( Posicione("SRA",1,xFilial("SRA")+FwFldGet("AA1_CDFUNC"),"RA_FILIAL") )
+
+RestArea(aArea)
+
+Return( cCodFil )       
+
+//------------------------------------------------------------------------------
+/*/{Protheus.doc} At020Disci()
+Rotina Abre a Tela do Histórico Disciplina do Atendente Posicionado
+
+@author arthur.colado
+@since 18/03/2014
+@version 1.0
+/*/
+//------------------------------------------------------------------------------
+
+Function At020Disci(cCodTec)
+Local oPanel            := Nil
+Local oBrowse           := Nil
+
+DEFINE MSDIALOG oPanel TITLE "Histórico Disciplinar" FROM 050,050 TO 500,800 PIXEL//"Histórico Disciplinar"
+
+oBrowse:= FWmBrowse():New()
+oBrowse:SetOwner( oPanel )   
+oBrowse:SetDescription( "Histórico Discilinar") //"Histórico Discilinar"
+oBrowse:SetAlias( "TIT" )   
+oBrowse:DisableDetails() 
+oBrowse:SetWalkThru(.F.)
+oBrowse:SetAmbiente(.F.)
+oBrowse:SetProfileID("01") 
+oBrowse:SetMenuDef( "  " )
+oBrowse:SetFilterDefault( "TIT_CODTEC = '" + cCodTec + "' " ) 
+oBrowse:Activate() 
+
+//bloco de codigo para duplo click - deve ficar após o activate, senao o FWMBrowse ira sobreescrever com o bloco padrao
+oBrowse:BlDblClick := {||At020VisDisci()}  
+oBrowse:Refresh()
+
+ACTIVATE MSDIALOG oPanel CENTERED
+
+Return
+
+//------------------------------------------------------------------------------
+/*/{Protheus.doc} At020Disci()
+Rotina Realiza a abertura da tela de disciplina
+
+@author arthur.colado
+@since 18/03/2014
+@version 1.0
+/*/
+//------------------------------------------------------------------------------
+
+Function At020VisDisci()
+Local aArea       := GetArea()
+                 
+DbSelectArea("TIT")
+TIT->(DbSetOrder(1))
+      
+If TIT->(DbSeek(xFilial("TIT")+TIT->TIT_CODIGO))
+      FWExecView(Upper("Visualizar Disciplina"),"VIEWDEF.TECA440",MODEL_OPERATION_VIEW,/*oDlg*/,/*bCloseOnOk*/,/*bOk*/,/*nPercReducao*/)//"Visualizar Disciplina"      
+EndIf
+
+RestArea(aArea)
+
+Return (.T.)
+
+//------------------------------------------------------------------------------
+/*/{Protheus.doc} At020ImpFnc
+
+Criação do Browse para importar funcionários
+
+@sample 	At020ImpFnc() 
+@since		12/12/2017      
+@version 	P12
+@return 	lOk
+/*/
+//------------------------------------------------------------------------------
+Function At020ImpFnc(cTab,nRecno,nOpc,lAuto )
+
+Local oMrkBrowse	:= FWMarkBrowse():New()
+Local oGSTmpTb		:= Nil
+Local lOk 			:= .T.
+Local aFuncionar	:= {}
+Local aStruct		:= {}
+Local aIdx			:= {}
+Local aColumns    	:= {}
+Local aSeek			:= {}
+Local aInsertTmp	:= {}
+Local nStepCmmIns	:= 900 //Quantidade do lote de regsitros a serem gravados na tabela temporária a cada INSERT do objeto GsTmpTable
+Local nX			:= 1
+Local nY			:= 1
+
+Default lAuto	:= .F.
+
+aFuncionar:= At850Func()//Carrega lista dos funcionários 
+
+//Cria estrutura e tabela tmp com os campos necessarios
+Aadd(aStruct, {"OK"        , "C", 1 , 0})
+Aadd(aStruct, {"RA_FILIAL"	, "C", TamSX3("RA_FILIAL")[1]	, TamSX3("RA_FILIAL")[2]})
+Aadd(aStruct, {"RA_MAT"		, "C", TamSX3("RA_MAT")[1]		, TamSX3("RA_MAT")[2]})
+Aadd(aStruct, {"RA_NOME"	, "C", TamSX3("RA_NOME")[1]		, TamSX3("RA_NOME")[2]})
+Aadd(aStruct, {"RA_CARGO"	, "C", TamSX3("RA_CARGO")[1]	, TamSX3("RA_CARGO")[2]})
+Aadd(aStruct, {"RA_DCARGO"	, "C", TamSX3("RA_DCARGO")[1]	, TamSX3("RA_DCARGO")[2]})
+Aadd(aStruct, {"RA_CODFUN"	, "C", TamSX3("RA_CODFUNC")[1]	, TamSX3("RA_CODFUNC")[2]})
+Aadd(aStruct, {"RA_DESCFU"	, "C", TamSX3("RA_DESCFUN")[1]	, TamSX3("RA_DESCFUN")[2]})
+Aadd(aStruct, {"RA_CC"		, "C", TamSX3("RA_CC")[1]		, TamSX3("RA_CC")[2]})
+Aadd(aStruct, {"RA_TNOTRAB"	, "C", TamSX3("RA_TNOTRAB")[1]	, TamSX3("RA_TNOTRAB")[2]})    
+
+//Cria indices para a tabela temporária 
+Aadd(aIdx, {"I1",{ 'RA_MAT' }})
+Aadd(aIdx, {"I2",{ 'RA_CARGO'}})
+Aadd(aIdx, {"I3",{ 'RA_CODFUN'}})
+Aadd(aIdx, {"I4",{ 'RA_CC'}})
+Aadd(aIdx, {"I5",{ 'RA_TNOTRAB'}})
+
+//Cria array da busca de acordo com os indices da tabela temporária
+aAdd(aSeek, {TxDadosCpo('RA_MAT')[1]	,{{'','C',TamSX3('RA_MAT')[1],TamSX3('RA_MAT')[2],TxDadosCpo('RA_MAT')[1],PesqPict('SRA','RA_MAT'),NIL}},1})
+aAdd(aSeek, {TxDadosCpo('RA_CARGO')[1]	,{{'','C',TamSX3('RA_CARGO')[1],TamSX3('RA_CARGO')[2],TxDadosCpo('RA_CARGO')[1],PesqPict('SRA','RA_CARGO'),NIL}},2})
+aAdd(aSeek, {TxDadosCpo('RA_CODFUNC')[1],{{'','C',TamSX3('RA_CODFUNC')[1],TamSX3('RA_CODFUNC')[2],TxDadosCpo('RA_CODFUNC')[1],PesqPict('SRA','RA_CODFUNC'),NIL}},3})
+aAdd(aSeek, {TxDadosCpo('RA_CC')[1]		,{{'','C',TamSX3('RA_CC')[1],TamSX3('RA_CC')[2],TxDadosCpo('RA_CC')[1],PesqPict('SRA','RA_CC'),NIL}},4})
+aAdd(aSeek, {TxDadosCpo('RA_TNOTRAB')[1],{{'','C',TamSX3('RA_TNOTRAB')[1],TamSX3('RA_TNOTRAB')[2],TxDadosCpo('RA_TNOTRAB')[1],PesqPict('SRA','RA_TNOTRAB'),NIL}},5})
+
+//Instancia o método NEW para criação da tabela temporária
+oGSTmpTb := GSTmpTable():New('TRBAA1',aStruct, aIdx, {}, nStepCmmIns )
+cRetTab  := 'TRBAA1'
+
+//Validação para a criação da tabela temporária
+If !oGSTmpTb:CreateTMPTable()
+	oGSTmpTb:ShowErro()
+	
+	TRBAA1->(dbCloseArea()) 
+	oGSTmpTb:Close()
+	TecDestroy(oGSTmpTb)	  
+Else
+	//Preenche Tabela temporária com as informações filtradas
+	For nX := 1 To Len(aFuncionar)
+		aInsertTmp :={}
+		Aadd(aInsertTmp, {'RA_FILIAL'	,aFuncionar[nX][1]})
+		Aadd(aInsertTmp, {'RA_MAT'		,aFuncionar[nX][2]})
+		Aadd(aInsertTmp, {'RA_NOME'		,STRTRAN(aFuncionar[nX][3],"´", " ")})
+		Aadd(aInsertTmp, {'RA_CARGO'	,aFuncionar[nX][4]})
+		Aadd(aInsertTmp, {'RA_DCARGO'	,aFuncionar[nX][5]})
+		Aadd(aInsertTmp, {'RA_CODFUN'	,aFuncionar[nX][6]})
+		Aadd(aInsertTmp, {'RA_DESCFU'	,aFuncionar[nX][9]})
+		Aadd(aInsertTmp, {'RA_CC'		,aFuncionar[nX][8]})
+		Aadd(aInsertTmp, {'RA_TNOTRAB'	,aFuncionar[nX][7]})
+			
+		If oGSTmpTb:Insert(aInsertTmp)
+			lOk := oGSTmpTb:Commit()
+		Else
+			lOk := .F.
+			Exit
+		EndIf
+	Next nX
+	
+	//MarkBrowse
+	For nY := 1 To Len(aStruct)
+		If aStruct[nY][1] <> "OK" .AND. aStruct[nY][1] <> "RA_FILIAL" 
+			AAdd(aColumns,FWBrwColumn():New())
+			aColumns[Len(aColumns)]:SetData( &("{||"+aStruct[nY][1]+"}") )
+			aColumns[Len(aColumns)]:SetTitle(RetTitle(aStruct[nY][1]))
+			aColumns[Len(aColumns)]:SetSize(aStruct[nY][3])
+			aColumns[Len(aColumns)]:SetDecimal(aStruct[nY][4])
+			aColumns[Len(aColumns)]:SetPicture(PesqPict(cRetTab,aStruct[nY][1]))
+		EndIf
+	Next nY
+
+	If !lAuto
+		DEFINE MSDIALOG oDlg TITLE STR0004 From 300,0 To 700,1000 PIXEL //"Funcionários sem relacionamento com Atendentes:"
+		oMrkBrowse:SetOwner(oDlg)
+		oMrkBrowse:DisableFilter()
+	EndIf
+	
+	oMrkBrowse:SetDescription(STR0003) //"Importação de Funcionários"
+	oMrkBrowse:SetTemporary(.T.)     	
+	oMrkBrowse:AddButton(STR0031,{||At020GFun(cRetTab,oMrkBrowse,oGSTmpTb),oDlg:End()},,3,)		//"Gerar"
+	oMrkBrowse:AddButton(STR0007,{||At850CaAtd(, 3, "INCLUIR"),oDlg:End()},,3,,.F., 1)	//"Cad. Atendente"
+	oMrkBrowse:SetFieldMark("OK")
+	oMrkBrowse:SetAlias(cRetTab) //Seta o arquivo temporario para exibir a seleção dos dados
+	oMrkBrowse:SetSeek(.T.,aSeek) 
+	oMrkBrowse:SetAllMark( { || oMrkBrowse:AllMark() } )
+	oMrkBrowse:bMark := {||At020Mark(oMrkBrowse,cRetTab)}	        
+	oMrkBrowse:SetColumns(aColumns)
+	oMrkBrowse:DisableReport()
+	oMrkBrowse:SetMenuDef("")
+	
+	If !lAuto
+		oMrkBrowse:Activate()
+		ACTIVATE MSDIALOG oDlg CENTERED	
+	Else 
+		At020Mark(oMrkBrowse,cRetTab,lAuto)
+		At020GFun(cRetTab,oMrkBrowse,oGSTmpTb)
+	EndIf
+    
+   TRBAA1->(dbCloseArea()) 
+	oGSTmpTb:Close()
+	TecDestroy(oGSTmpTb)	    
+EndIf
+
+Return lOk
+//------------------------------------------------------------------------------
+/*/{Protheus.doc} At020Nome()
+Gatilho Nome do Atendente
+
+@since 18/03/2014
+@version 1.0
+/*/
+//------------------------------------------------------------------------------
+Function At020Nome()
+Local cCodNom	:= ""
+Local aArea	:= GetArea()
+
+cCodNom := Alltrim( Posicione("SRA",1,xFilial("SRA")+FwFldGet("AA1_CDFUNC"),"RA_NOME") )
+
+RestArea(aArea)
+
+Return( cCodNom )    
+
+//------------------------------------------------------------------------------
+/*/{Protheus.doc} At020SeqTr()
+Gatilho Sequencia do Turno
+
+@since 18/03/2014
+@version 1.0
+/*/
+//------------------------------------------------------------------------------
+Function At020SeqTr()
+Local cSeqTur	:= ""
+Local aArea	:= GetArea()
+
+cSeqTur := Alltrim( Posicione("SRA",1,xFilial("SRA")+FwFldGet("AA1_CDFUNC"),"RA_SEQTURN") )
+
+RestArea(aArea)
+
+Return( cSeqTur )    
+
+//------------------------------------------------------------------------------
+/*/{Protheus.doc} At020Funcao()
+Gatilho da Função
+
+@since 18/03/2014
+@version 1.0
+/*/
+//------------------------------------------------------------------------------
+Function At020Funcao()
+Local cFuncao	:= ""
+Local aArea	:= GetArea()
+
+cFuncao := Alltrim( Posicione("SRA",1,xFilial("SRA")+FwFldGet("AA1_CDFUNC"),"RA_CODFUNC") )
+
+RestArea(aArea)
+
+Return( cFuncao )    
+
+
+//------------------------------------------------------------------------------
+/*/{Protheus.doc} At020AltRH()
+Função para alteração das informações do RH
+
+@since 18/03/2014
+@version 1.0
+/*/
+//------------------------------------------------------------------------------
+Function At020AltRH(cFil, cMat, aCampos, lPos, cFilAtend)
+Local lRet		:= .T.
+Local nI		:= 0
+Local lSIXAA1 := checkSIX("AA1", 7)
+Default cFil 		:= ""
+Default cMat		:= ""
+Default aCampos	:= {}	
+Default lPos		:= .T.
+Default cFilAtend	:= ""
+
+//Verifica se existe o indice 7 para poder realizar a replica.
+If !lSIXAA1
+	Return(.F.)
+EndIf
+
+//Define se o registro já está posicionado
+If !lPos
+	DbSelectArea("AA1")
+	AA1->(DbSetOrder(7))
+			
+	If !AA1->(DbSeek(cFil + cMat + cFilAtend))
+		Return(.F.)
+	EndIf	
+EndIf
+
+//Verifica se há campo e valor a serem alterados
+If !Empty(aCampos)
+
+	//Estrutura do aCampo
+	//[N][1] - Nome do Campo
+	//[N][2] - Valor alterado 
+
+	//Campos que podem ser Alterados
+	// RA_NOME
+	// RA_CC
+	// RA_TNOTRAB
+	// RA_SEQTURN
+	// RA_CODFUNC
+	// RA_MAT
+	//RA_FILIAL
+	BEGIN TRANSACTION
+	
+		RecLock("AA1" , .F.)
+		
+		For nI := 1 To Len(aCampos)
+				
+				Do Case
+					Case aCampos[nI][1] == "RA_NOME"			
+						REPLACE AA1_NOMTEC With aCampos[nI][2]
+					Case aCampos[nI][1] == "RA_CC"
+						REPLACE AA1_CC With aCampos[nI][2]
+					Case aCampos[nI][1] == "RA_TNOTRAB"
+						REPLACE AA1_TURNO With aCampos[nI][2]
+					Case aCampos[nI][1] == "RA_SEQTURN"
+						If AA1->(FieldPos("AA1_SEQTUR")) > 0
+							REPLACE AA1_SEQTUR With aCampos[nI][2]
+						EndIF	
+					Case aCampos[nI][1] == "RA_CODFUNC"
+						REPLACE AA1_FUNCAO With aCampos[nI][2]	
+					Case aCampos[nI][1] == "RA_MAT"
+						REPLACE AA1_CDFUNC With aCampos[nI][2]		
+					Case aCampos[nI][1] == "RA_FILIAL"
+						REPLACE AA1_FUNFIL With aCampos[nI][2]		
+				EndCase
+		
+		Next nI
+		
+		AA1->(MsUnlock())
+	
+	END TRANSACTION
+	
+EndIf
+
+Return (lRet)
+
+
+//------------------------------------------------------------------------------
+/*/{Protheus.doc} At020VTCA
+Função para validação do tamanho do campo AA1_CODTEC e suporte ao gatilho sequencia 2 do campo AA1_CDFUNC 
+
+@sample 	At020VTCA()
+@since		13/05/2015
+@version	12.1.6
+/*/
+//------------------------------------------------------------------------------
+
+Function At020VTCA()
+Local lRet := .T.
+
+lRet := TamSX3('AA1_CODTEC')[1] >= (TamSX3('RA_MAT')[1] + TamSX3('AA1_FILIAL')[1])
+If !lRet
+	Help(" ",1,"AT020VTCA")	//###O tamanho do campo Código do Atendente tem tamanho insuficiente para receber o novo código que referencia o código do funcionário. ### Informe o ocorrido ao Administrador.###
+EndIf
+
+Return lRet
+
+
+//-------------------------------------------------------------------------------------
+/*/{Protheus.doc} At020VldFu
+Valida para que nao seja possivel incluir o funcionario da SRA mais de uma vez como Atendente 
+na AA1
+@author  TOTVS SP - Equipe de Projetos Piloto do Segmento de Servicos e Juridico
+@param   cCdFunc		Caracter - Código do funcionário no SIGAGPE
+@param   cCdFilFun	Caracter - Código da filial do funcionário no SIGAGPE
+@return  Nil
+@since 	 01/12/2015
+@version P12
+/*/
+//-------------------------------------------------------------------------------------
+Function At020VldFu( cCdFunc, cCdFilFun )
+Local lRet := .T.
+Local aArea := AA1->(GetArea())
+	
+dbSelectArea('AA1')
+AA1->(dbSetOrder(7)) // AA1_FILIAL+AA1_CDFUNC+AA1_FUNFIL
+If AA1->(dbSeek(xFilial('AA1') + PadR(cCdFunc,TamSx3("AA1_CDFUNC")[1]) + PadR(cCdFilFun,TamSx3("AA1_FUNFIL")[1])))
+	lRet := .F.
+	Help(" ",1,"HELP", , STR0029 + Alltrim(AA1->AA1_CODTEC), 3, 1 ) //"Este funcionario ja esta matriculado como atendente pelo codigo nro: "
+EndIf
+RestArea(aArea)
+	
+Return lRet
+
+//-------------------------------------------------------------------------------------
+/*/{Protheus.doc} At020VlDtC
+Alerta para vencimento do curso do atendente
+@param  aCodAtend	Array   contendo Codigo(s) do atendente(s)
+@param  lShowPerg	Boolean se deve perguntar se deseja continuar?
+@sample At020VlDtC(aCodAtend,lShowPerg)
+@since  28/08/2015
+@return lRet Boolean
+/*/
+//-------------------------------------------------------------------------------------
+Function At020VlDtC(aCodAtend,lShowPerg)
+
+Local aAreaAtu	:= GetArea()
+Local aAreaAA1	:= AA1->(GetArea())
+Local aAreaSRA	:= SRA->(GetArea())
+Local aAreaRAL	:= RAL->(GetArea())
+Local cAliasQry	:= GetNextAlias()
+Local lRetorno	:= .T.
+Local nInd
+Local aAtendente	:= {}  //Atendente com curso vencido
+Local cMensagem	:= STR0025+Space(1)//"Funcionário"
+Local cSeparador	:= " - "
+Local lTemCursoVenc
+Local cFilAA1		:= xFilial("AA1")
+Local cFilRAL		:= xFilial("RAL")
+Default lShowPerg	:= .T.
+
+AA1->(dbsetorder(1))//AA1_FILIAL+AA1_CODTEC
+SRA->(dbsetorder(1))//RA_FILIAL+RA_MAT
+RAL->(dbsetorder(1))//RAL_FILIAL+RAL_FUNCAO+RAL_CURSO
+
+aSort(aCodAtend)
+For nInd:=1 To Len(aCodAtend)
+
+	If !( AA1->(dbseek(cFilAA1+aCodAtend[nInd])) .And. SRA->(dbseek(AA1->(AA1_FUNFIL+AA1_CDFUNC))) .And. RAL->(dbSeek(cFilRAL+SRA->RA_CODFUNC)) )
+		Loop
+	EndIf
+
+	//Verificar primeiro sem data de validade ( sem prazo de vencimento )
+	BeginSql Alias cAliasQry
+		Select Count(1) Contar
+		  From %Table:RA4% RA4,%Table:RAL% RAL
+		 Where RA4_FILIAL=%xFilial:RA4%
+		   And RA4.RA4_MAT=%Exp:SRA->RA_MAT%
+		   And RA4.RA4_VALIDA=' '
+		   And RA4.%notdel%
+		   And RAL.RAL_FILIAL=%xFilial:RAL%
+		   And RAL.RAL_CURSO=RA4.RA4_CURSO
+		   And RAL.RAL_FUNCAO=%Exp:SRA->RA_CODFUNC%
+		   And RAL.%notdel%
+	EndSql
+
+	lTemCursoVenc:=( (cAliasQry)->Contar== 0)
+
+	(cAliasQry)->(dbCloseArea())
+	If lTemCursoVenc
+
+		//Verificar se há curso vencido
+		BeginSql Alias cAliasQry
+			COLUMN RA4_VALIDA AS DATE
+			Select Max(RA4_VALIDA) RA4_VALIDA
+			  From %Table:RA4% RA4,%Table:RAL% RAL
+			 Where RA4_FILIAL=%xFilial:RA4%
+			   And RA4.RA4_MAT=%Exp:SRA->RA_MAT%
+			   And RA4.RA4_VALIDA<>' '
+			   And RA4.%notdel%
+			   And RAL.RAL_FILIAL=%xFilial:RAL%
+			   And RAL.RAL_CURSO=RA4.RA4_CURSO
+			   And RAL.RAL_FUNCAO=%Exp:SRA->RA_CODFUNC%
+			   And RAL.%notdel%
+		EndSql
+
+		If Empty((cAliasQry)->RA4_VALIDA)
+			lTemCursoVenc:=.F.
+		Else
+			lTemCursoVenc:=(cAliasQry)->RA4_VALIDA<dDataBase
+		EndIf
+		(cAliasQry)->(dbCloseArea())
+
+	EndIf
+
+	If lTemCursoVenc
+		Aadd(aAtendente,AA1->AA1_CODTEC)
+		cMensagem+="#"+AllTrim(Str(Len(aAtendente)))+"[Atendente]#"+cSeparador
+	EndIf
+
+Next nInd
+
+If Len(aAtendente)>0
+	lRetorno:=.F.
+	If lShowPerg
+		cMensagem:=Left(cMensagem,Len(cMensagem)-Len(cSeparador))+Space(1)+STR0026+CRLF+STR0027 //com curso vencido+CRLF+Deseja continuar?
+		lRetorno:=MsgYesNo(I18N( cMensagem,aAtendente, 1, 0 ),STR0028 )	//Atenção
+	EndIf
+EndIf
+
+RestArea(aAreaAA1)
+RestArea(aAreaSRA)
+RestArea(aAreaRAL)
+RestArea(aAreaAtu)
+Return lRetorno
+
+/*/{Protheus.doc} at020ValUs
+	Validação para usuario, o usuario pode estar atrelado apenas a um atendente
+	
+	@author 	Joni Lima do Carmo
+	@since 		05/08/2016
+	@version 	12
+	@param		Nil
+	@return 	lRet Boolean
+
+/*/
+Function at020ValUs()
+
+	Local aArea	:= GetArea()
+	Local aAreaAA1	:= AA1->(GetArea())
+	
+	Local lRet := .T.
+	
+	Local oModel := FWModelActive()
+	Local oMdlAA1 := nil
+	
+	If ValType(oModel)=='O' .and. oModel:IsActive() .and. oModel:GeTID() == 'TECA020' 
+	
+		oMdlAA1 := oModel:GetModel('AA1MASTER')
+		
+		cCodUser := oMdlAA1:GetValue('AA1_CODUSR')
+		
+		dbSelectArea('AA1')
+		AA1->(dbSetOrder(4))
+		
+		If AA1->(dbSeek(xFilial('AA1') + PadR(cCodUser,TamSx3("AA1_CODUSR")[1])))
+			lRet := .F.
+			Help(" ",1,"HELP", , STR0030 + Alltrim(AA1->AA1_CODTEC), 3, 1 ) //"Este usuario ja esta matriculado como atendente pelo codigo nro: "
+		EndIf
+		
+	EndIf
+	
+	RestArea(aAreaAA1)
+	RestArea(aArea)
+	
+Return lRet
+//-------------------------------------------------------------------------------------
+/*/{Protheus.doc} At020Mark
+
+Faz gravação no campo OK com a marcação.
+
+@return	lRet
+@author	rebeca.asuncao
+@since 		12/12/2017
+@version	P12.1.17 
+/*/
+//-------------------------------------------------------------------------------------
+Function At020Mark(oMrkBrowse,cRetTab,lAuto, cMat)
+Local aArea		:= GetArea()
+Local cMarca	:= ""
+ 
+Default lAuto	:= .F.
+Default cMat	:= ''
+
+DbSelectArea(cRetTab)
+
+If !lAuto
+	cMarca := oMrkBrowse:Mark()
+	While !(cRetTab)->(Eof()) 
+		RecLock(cRetTab, .F.)
+			
+		If (cRetTab)->OK <> cMarca
+			(cRetTab)->OK := ' '
+		Else
+			(cRetTab)->OK := cMarca
+		EndIf
+		MsUnlock()
+		(cRetTab)->(DbSkip())
+	End
+Else
+	cMarca := "C" 
+	(cRetTab)->(DbGoTop())
+	While !(cRetTab)->(Eof()) 
+		RecLock(cRetTab, .F.)
+		If (cRetTab)->RA_MAT == cMat
+			(cRetTab)->OK := cMarca
+		Else
+			(cRetTab)->OK := ' '
+		EndIf
+		MsUnlock()
+		(cRetTab)->(DbSkip())
+	End
+EndIf
+
+RestArea(aArea)
+
+If !lAuto
+	oMrkBrowse:Refresh()
+EndIf
+
+Return 
+
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} At020GFun
+Gera atendentes com os funcionários que não possuem relacionamento com atendentes e que foram marcados no Browse.
+
+@return	lRet
+@author	rebeca.asuncao
+@since 		12/12/2017
+@version	P12.1.17 
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Function At020GFun(cRetTab,oMrkBrowse,oGSTmpBk)
+
+Local aMarkFun		:= {}
+Local aRotAuto		:= {}
+
+Local lOK			:= .T.
+Local lAuto			:= IsBlind()
+Local nCont			:= 0
+Local nX			:= 1
+Local lMark			:= .F.
+Local lRet			:= .T.
+
+Default cRetTab := ""
+Default oMrkBrowse := Nil
+Default oGSTmpBk := Nil
+
+If lAuto
+	(cRetTab)->(DbGoTop())
+	While !(cRetTab)->(EOF())
+			If (cRetTab)->OK == "C"
+				aadd(aMarkFun, {(cRetTab)->RA_NOME,;
+								(cRetTab)->RA_CODFUN,;
+								(cRetTab)->RA_MAT,;
+								(cRetTab)->RA_FILIAL,;
+								(cRetTab)->RA_CC,;
+								(cRetTab)->RA_TNOTRAB }) 							
+			EndIf
+		(cRetTab)->( DbSkip() )
+	EndDo
+Else
+	(cRetTab)->(DbGoTop())
+	
+	While (cRetTab)->(!EOF())
+		If oMrkBrowse:IsMark()
+			aadd(aMarkFun, {(cRetTab)->RA_NOME,;
+							(cRetTab)->RA_CODFUN,;
+							(cRetTab)->RA_MAT,;
+							(cRetTab)->RA_FILIAL,;
+							(cRetTab)->RA_CC,;
+							(cRetTab)->RA_TNOTRAB }) 							
+		EndIf	
+		(cRetTab)->( DbSkip() )
+	EndDo
+EndIf
+
+If !lAuto
+	MsgRun( STR0032,STR0028,{|| lRet := AutoInclude(aMarkFun,cRetTab,oMrkBrowse,oGSTmpBk) })// 'Atenção' ### "Aguarde! Gerando Atendentes ..."]
+Else
+	lRet := AutoInclude(aMarkFun,cRetTab,oMrkBrowse,oGSTmpBk)
+EndIf
+
+Return lRet
+
+
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} At020Atua
+Atualiza a tabela temporária e limpa o array aMarkFun
+
+@return	lRet
+@author	rebeca.asuncao
+@since 		12/12/2017
+@version	P12.1.17 
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Function At020Atua(cRetTab,aMarkFun,oMrkBrowse,oGSTmpBk)
+Local nX	:= 1
+Local lRet	:= .T.
+Local aRet := {}
+
+Default cRetTab := ""
+Default aMarkFun := {}
+Default oMrkBrowse := Nil 
+Default oGSTmpBk := Nil
+
+If Len(aMarkFun) > 0
+	For nX:= 1 To Len(aMarkFun)
+	 	aAdd(aRet, {'RA_MAT', aMarkFun[nX][3]} ) 
+		If oGSTmpBk:Seek(aRet)
+			If oGSTmpBk:Delete()
+				oGSTmpBk:Commit()
+			EndIf 
+			aRet:= {}
+		EndIf
+	Next 							
+	aMarkFun := {} //limpa o array	
+Else 
+	lRet := .F.
+EndIf
+
+Return lRet
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} At020Reser
+Verifica se existe a escala no posto de reserva
+
+@return	lInclui - Se a TFF deverá ser inclusa ou não
+@author	Pâmela Bernardo
+@since 		16/07/2018
+@version	P12.1.17 
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Static Function At020Reser(cCodTFJ,cEscala)
+Local lInclui := .F.
+Local cAliasQry := GetNextAlias()
+
+	BeginSQL Alias cAliasQry
+		SELECT TFF_ESCALA
+		  FROM %Table:TFJ% TFJ
+		  JOIN %Table:TFL% TFL ON
+		  	TFL.TFL_FILIAL = TFJ.TFJ_FILIAL AND
+			TFL.TFL_CODPAI = TFJ.TFJ_CODIGO AND
+			TFL.%NotDel%
+		JOIN %Table:TFF% TFF ON
+			TFF.TFF_FILIAL = TFL.TFL_FILIAL AND
+			TFF.TFF_CODPAI = TFL.TFL_CODIGO AND
+			TFF.TFF_ESCALA =  %Exp:cEscala% AND
+			TFF.%NotDel%
+		 WHERE TFJ.TFJ_FILIAL = %xFilial:TFJ% AND 
+		  	TFJ.TFJ_CODIGO = %Exp:cCodTFJ% AND
+		    TFJ.%NotDel%
+	EndSQL
+
+	If Select(cAliasQry) > 0
+		lInclui:= Empty((cAliasQry)->TFF_ESCALA)
+		(cAliasQry)->(dbCloseArea())
+	EndIf
+
+Return lInclui
+
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} At020VlEsc
+Validação da escala e do codigo do efetivo, verifica se o turno e a sequencia existe no cadastro de escalas AA1_ESCALA,AA1_EFETIV.
+
+@return	lRet
+@author	Kaique Schiller
+@since 		23/08/2018
+@version	P12.1.17 
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Function At020VlEsc(cCmp)
+Local lRet 		:= .T.
+Local cFilTDX 	:= xFilial("TDX")
+Local cEscala 	:= FwFldGet("AA1_ESCALA")
+Local cTurno  	:= FwFldGet("AA1_TURNO")
+Local cSeq    	:= FwFldGet("AA1_SEQTUR")
+
+DbSelectArea("TDX")
+TDX->(DbSetOrder(2))
+If !TDX->(DbSeek(cFilTDX+cEscala+cTurno+cSeq))
+	Help( "", 1, "At020VlEsc", , STR0033, 1, 0,,,,,,{ STR0035 })  //"Codigo da escala invalido."##"Informe uma escala que contemple esse turno e sequência."
+	lRet := .F.
+Endif
+
+Return lRet
+
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} At020When
+Bloqueia os campos AA1_ESCALA,AA1_SEQTUR e RA_TNOTRAB.
+
+@return	lRet
+@author	Kaique Schiller
+@since 		11/09/2018
+@version	P12.1.17 
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Function At020When(oMdl,cCmp,xVlr)
+Local lRet	:= .F.
+
+If cCmp == "AA1_SEQTUR"
+	If !Empty(FwFldGet("AA1_TURNO")) .And. !At336TGYChk( , xFilial("AA1"), FwFldGet("AA1_CODTEC") , dDataBase, .T., "3" ); 
+									 .And. !At336TGZChk( , xFilial("AA1"), FwFldGet("AA1_CODTEC") , dDataBase, ,.T. )
+		lRet := .T.
+	Endif
+Elseif cCmp == "AA1_ESCALA"
+	If !Empty(FwFldGet("AA1_TURNO")) .And. !Empty(FwFldGet("AA1_SEQTUR"));
+									 .And. !At336TGYChk( , xFilial("AA1"), FwFldGet("AA1_CODTEC") , dDataBase, .T., "3" ); 
+									 .And. !At336TGZChk( , xFilial("AA1"), FwFldGet("AA1_CODTEC") , dDataBase, ,.T. )
+		lRet := .T.
+	Endif
+Elseif cCmp $ "RA_TNOTRAB|RA_SEQTURN"
+
+	lRet := .T.
+
+	DbSelectArea("AA1")
+	AA1->(DbSetOrder(7))
+	If AA1->(DbSeek(xFilial("SRA") + M->RA_MAT)) .And. At336TGYChk( , AA1->AA1_FILIAL, AA1->AA1_CODTEC , dDataBase, .T., "3" ); 
+								  				 .Or.  At336TGZChk( , AA1->AA1_FILIAL, AA1->AA1_CODTEC , dDataBase, ,.T. )
+		lRet := .F.
+	Endif
+Endif
+
+Return lRet
+
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} At020RsTff()
+Localiza o codigo da tff conforme o orçamento de reserva e escala.
+     
+@author 	Kaique Schiller
+@since		22/02/2018
+@version 	P12
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Function At020RsTff(cFil,cOrcRes,cEscala)
+Local cAliasTFJ := GetNextAlias()
+Local cResPad	:= ""
+Local dDtBase	:= DToS(dDataBase)
+
+BeginSql Alias cAliasTFJ
+	SELECT TFF.TFF_COD
+	FROM %table:TFJ% TFJ
+	JOIN %table:TFL% TFL 
+		ON 	TFL.TFL_FILIAL=%xFilial:TFL% 
+		AND TFL.TFL_CODPAI=TFJ.TFJ_CODIGO 
+		AND TFL.%NotDel%
+	JOIN %table:TFF% TFF 
+		ON TFF.TFF_FILIAL=%xFilial:TFF% 
+		AND TFF.TFF_CODPAI=TFL_CODIGO 
+		AND TFF.%NotDel%
+	WHERE TFJ.TFJ_FILIAL 	 = %Exp:cFil%
+		  AND TFJ.TFJ_CODIGO = %Exp:cOrcRes%
+  		  AND TFJ.%NotDel%
+		  AND TFF.TFF_ESCALA = %Exp:cEscala%
+		  AND (%Exp:dDtBase% BETWEEN TFF.TFF_PERINI AND TFF.TFF_PERFIM)
+EndSql
+
+If (cAliasTFJ)->(!Eof())
+	cResPad := (cAliasTFJ)->TFF_COD
+Endif
+
+(cAliasTFJ)->(DbCloseArea())
+
+Return cResPad
+
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} At020Filtr()
+Localiza a escala por turno e sequência.
+     
+@author 	Kaique Schiller
+@since		22/02/2018
+@version 	P12
+
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Function At020Filtr()
+Local cSQL := ""
+
+cSQL := "@TDX_FILIAL 	= '" + xFilial("TDX") 			+ "'"
+cSQL += "AND TDX_TURNO 	= '" + FwFldGet("AA1_TURNO") 	+ "'"
+cSQL += "AND TDX_SEQTUR = '" + FwFldGet("AA1_SEQTUR") 	+ "'"
+
+Return cSQL
+
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} At020VdInp()
+Validação de inaptidão.
+     
+@author 	Kaique Schiller
+@since		23/01/2019
+@return		lRet
+
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Static Function At020TdInp()
+Local lRet 		:= .T.
+
+If FwFldGet("AA1_INAPT") == "1"
+	  
+	If Empty(FwFldGet("AA1_ABLOQ"))
+		Help( "", 1, "At020VdInp", , STR0050, 1, 0,,,,,,{ STR0051 }) //'Quando o campo "Inapto?" estiver igual a "Sim" o campo de "Bloqueia?" é obrigatório.' # 'Preencha o campo "Bloqueia?".'
+		lRet := .F.
+	Elseif Empty(FwFldGet("AA1_MTBLQ"))
+		Help( "", 1, "At020VdInp", , STR0052, 1, 0,,,,,,{ STR0053 }) //'Quando o campo "Inapto?" estiver igual a "Sim" o campo de "Mot. Inapto?" é obrigatório.' # 'Preencha o campo "Mot. Inapto".'
+		lRet := .F.
+	Elseif Empty(FwFldGet("AA1_DTINI")) .Or. cTod("") == FwFldGet("AA1_DTINI")
+		Help( "", 1, "At020VdInp", , STR0054, 1, 0,,,,,,{ STR0055 }) //'Quando o campo "Inapto?" estiver igual a "Sim" o campo de "Dt Ini Inapt" é obrigatório.' # 'Preencha o campo "Dt Ini Inapt".'
+		lRet := .F.
+	Elseif Empty(FwFldGet("AA1_DTFIM")) .Or. cTod("") == FwFldGet("AA1_DTFIM")
+		Help( "", 1, "At020VdInp", , STR0056, 1, 0,,,,,,{ STR0057 }) //'Quando o campo "Inapto?" estiver igual a "Sim" o campo de "Dt Fim Inapt" é obrigatório.' # 'Preencha o campo "Dt Fim Inapt".'
+		lRet := .F.
+	Endif 
+Endif
+
+Return lRet
+
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} At020Inapt()
+Verifica se o atendente está inapto.
+     
+@author 	Kaique Schiller
+@since		23/01/2019
+@return		lRet
+
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Function At020Inapt(cFilAtd,cCodTec,dDtMov)
+Local lRet 		:= .T.
+Default cFilAtd := ""
+Default cCodTec := ""
+Default dDtMov	:= cTod("")
+
+dbSelectArea("AA1")
+AA1->(dbSetOrder(1))
+If AA1->(dbSeek(cFilAtd+cCodTec))
+	If AA1->AA1_INAPT == "1"
+		If dDtMov >= AA1->AA1_DTINI .And. dDtMov <= AA1->AA1_DTFIM
+			If AA1->AA1_ABLOQ == "1"
+				Aviso(STR0058,STR0059+CRLF+CRLF+STR0060+Alltrim(AA1->AA1_MTBLQ),{STR0061}, 3) //"Atenção!" # 'O atendente está inapto não será possível continuar com a movimentação, caso queira movimentar esse atendente entre no cadastro de atendente e altere o campo "Bloqueia?" igual a "Não".' # "Motivo de bloqueio: " # "Ok"
+				lRet := .F.
+			Else
+				nOk := Aviso(STR0058,STR0062+CRLF+CRLF+STR0063+Alltrim(AA1->AA1_MTBLQ),{STR0064,STR0065}, 3) //"Atenção!" # 'O atendente está inapto gostaria de continuar com a movimentação?' # "Motivo de bloqueio: " # "Sim" # "Não"
+				If nOk <> 1
+					lRet := .F.
+				Endif
+			Endif
+		Endif
+	Endif
+Endif
+
+Return lRet
+
+
+//------------------------------------------------tw--------------------------------------------------------------------
+/*/{Protheus.doc} At020VlInp()
+Verificar se é possível deixar o atendente inapto.
+     
+@author 	Kaique Schiller
+@since		23/01/2019
+@return		lRet
+
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Function At020VlInp(cInpat)
+Local lRet := .T.
+
+If cInpat == "1" .And. At336TGYChk( , xFilial("AA1"), FwFldGet("AA1_CODTEC") , dDataBase, .T., "1" ) .Or. At336TGZChk( , xFilial("AA1"), FwFldGet("AA1_CODTEC") , dDataBase, ,.T. )
+
+	Help( "", 1, "At020VlInp", , STR0066, 1, 0,,,,,,{ STR0067 }) //"Não é possível deixar o atendente inapto." # "Realize o recolhimento do atendente, ele tem que estar alocado na reserva técnica."
+	lRet := .F.
+
+Endif
+
+Return lRet
+
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} At020FltFx()
+Verificar se é possível realizar o retorno de falta fixa.
+     
+@author 	Kaique Schiller
+@since		12/02/2019
+@return		lRet
+
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Function At020FltFx(cFaltFix)
+Local lRet 		:= .T.
+Local aAusencia := {}
+Local cCodUsr	:= ""
+
+If cFaltFix == "2"
+	
+	cCodUsr := Alltrim(RetCodUsr())
+	
+	If Posicione('AA1',4,xFilial('AA1')+cCodUsr,'AA1_SUPERV') <> '1'
+		Help( "", 1, "At020FltFx", , "Não é possível realizar o retorno de falta fixa.", 1, 0,,,,,,{ "O usuário do sistema não é um supervisor, somente o supervisor pode alterar o campo de falta fixa." }) //"Não é possível realizar o retorno de falta fixa."#"O funcionário já foi demitido realize o processo de recontratação."
+		lRet := .F.
+	Endif
+
+	If lRet 
+		aAusencia := At335ChkAu(xFilial("TW5"), FwFldGet("AA1_CODTEC"), dDataBase)
+		If Len(aAusencia) > 0 .And. aAusencia[1][1] <> "7"
+			Help( "", 1, "At020FltFx", , "Não é possível realizar o retorno de falta fixa, ausência não encontrada.", 1, 0,,,,,,{ "Entre com a data correta no sistema para realizar o retorno de falta fixa." }) //"Não é possível realizar o retorno de falta fixa."#"O funcionário já foi demitido realize o processo de recontratação."
+			lRet := .F.
+		Endif
+	Endif
+
+	If lRet .And. At570ChkDm(xFilial("SR8"), FwFldGet("AA1_CDFUNC"), dDataBase, dDataBase)
+		Help( "", 1, "At020FltFx", , "Não é possível realizar o retorno de falta fixa.", 1, 0,,,,,,{ "O funcionário já foi demitido realize o processo de recontratação." }) //"Não é possível realizar o retorno de falta fixa."#"O funcionário já foi demitido realize o processo de recontratação."
+		lRet := .F.
+	Endif
+	
+Else
+	Help( "", 1, "At020FltFx", , "Não é possível alterar esse campo.", 1, 0,,,,,,{ "Realize o processo de falta fixa." }) //"Não é possível alterar a situação desse campo."#"Realize o processo de falta fixa." 
+	lRet := .F.
+Endif
+
+Return lRet
+
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} AutoInclude
+Função utilizada na inclusão automática de atendentes
+
+@return	lRet, bool, retorna .T. se não ocorrer erros
+@author	Mateus Boiani
+@since 		27/12/2018
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Static Function AutoInclude(aMarkFun,cRetTab,oMrkBrowse,oGSTmpBk)
+Local oModel
+Local aRotAuto := {}
+Local nX
+Local nY
+Local nCont
+Local lOK := .T.
+Local aErrors := {}
+Local oModelAA1
+Local oModel
+Local cMsg := ""
+Local aErroMVC := {}
+Local lRet	:= .T.
+Local aCountErr := {}
+Local nAux := 0 
+Local nSuccess := 0
+Local nFail := 0
+
+If Len(aMarkFun) > 0
+	oModel := FwLoadModel("TECA020")
+	For nCont := 1 To Len(aMarkFun)
+		lOK := .T.
+		
+		aAdd(aRotAuto,{"AA1_NOMTEC"	,aMarkFun[nCont][1]	,Nil})
+		aAdd(aRotAuto,{"AA1_FUNCAO"	,aMarkFun[nCont][2]	,Nil})
+		aAdd(aRotAuto,{"AA1_CDFUNC"	,aMarkFun[nCont][3]	,Nil})
+		aAdd(aRotAuto,{"AA1_FUNFIL"	,aMarkFun[nCont][4]	,Nil})
+		aAdd(aRotAuto,{"AA1_CC"		,aMarkFun[nCont][5]	,Nil})
+		aAdd(aRotAuto,{"AA1_TURNO"	,aMarkFun[nCont][6]	,Nil})
+		
+		oModel:SetOperation( MODEL_OPERATION_INSERT )
+		oModel:Activate()
+		oModelAA1 := oModel:GetModel("AA1MASTER")
+
+		For nX := 1 to LEN(aRotAuto)
+			If !EMPTY(aRotAuto[nX][2])
+				If !(oModelAA1:SetValue(aRotAuto[nX][1],aRotAuto[nX][2]))
+					lOK := .F.
+					Exit
+				EndIf
+			EndIf
+		Next
+		
+		Begin Transaction
+		
+			If !lOK .OR. !oModel:VldData() .OR. !oModel:CommitData()
+				nFail++
+				aErroMVC := oModel:GetErrorMessage()
+				AADD(aErrors, {"AA1_NOMTEC: " 	+ aMarkFun[nCont][1],;
+								 "AA1_FUNCAO: " 	+ aMarkFun[nCont][2],;
+								 "AA1_CDFUNC: " 	+ aMarkFun[nCont][3],;
+								 "AA1_FUNFIL: " 	+ aMarkFun[nCont][4],;
+								 "AA1_CC: " 		+ aMarkFun[nCont][5],;
+								 "AA1_TURNO: " 	+ aMarkFun[nCont][6],;
+								 STR0041 + ' [' + AllToChar( aErroMVC[1] ) + ']',; // "Id do formulário de origem:"
+								 STR0042 + ' [' + AllToChar( aErroMVC[2] ) + ']',; //"Id do campo de origem:"
+								 STR0043 + ' [' + AllToChar( aErroMVC[3] ) + ']',; //"Id do formulário de erro:"
+								 STR0044 + ' [' + AllToChar( aErroMVC[4] ) + ']',; //"Id do campo de erro:"
+								 STR0045 + ' [' + AllToChar( aErroMVC[5] ) + ']',; //"Id do erro:"
+								 STR0046 + ' [' + AllToChar( aErroMVC[6] ) + ']',; //"Mensagem do erro:"
+								 STR0047 + ' [' + AllToChar( aErroMVC[7] ) + ']',; //"Mensagem da solução:"
+								 STR0048 + ' [' + AllToChar( aErroMVC[8] ) + ']',; //"Valor atribuído:"
+								 STR0049 + ' [' + AllToChar( aErroMVC[9] ) + ']'; //"Valor anterior:"
+								 })
+				lOK := .F.
+				DisarmTransacation()
+				oModel:DeActivate()
+			EndIf
+		End Transaction
+		//limpa o array
+		For nX := 1 to LEN(aRotAuto)
+			ASIZE(aRotAuto[nX],0)
+		Next
+		aRotAuto := {}
+		
+		If lOK
+			nSuccess++
+			At020Atua(cRetTab,{aMarkFun[nCont]},oMrkBrowse,oGSTmpBk) //Atualiza tabela temporária
+		EndIf
+		oModel:DeActivate()
+	Next nCont
+EndIf
+
+If !EMPTY(aErrors)
+	cMsg += STR0068 + " " + cValToChar(( nCont - 1 )) + CRLF //"Total de funcionários processados:" 
+	cMsg += STR0069 + " " + cValToChar(nSuccess) + CRLF //"Atendentes inseridos:" 
+	cMsg += STR0070 + " " + cValToChar(nFail) + CRLF + CRLF //"Atendentes não inseridos (falhas):"
+	cMsg += STR0038 + CRLF + CRLF //"Os atendentes abaixo não foram inseridos: "
+	If LEN(aErrors) <= 50 //Não há necessidade de exibir um log kilométrico. Caso maior que 50, a informação será agrupada.
+		For nX := 1 To LEN(aErrors)
+			For nY := 1 To LEN(aErrors[nX])
+				cMsg += aErrors[nX][nY] + CRLF
+			Next
+			cMsg += CRLF + REPLICATE("-",30) + CRLF
+		Next
+	Else
+		For nX := 1 To LEN(aErrors)
+			If (nAux := ASCAN(aCountErr, {|z| z[1] == aErrors[nX][12]})) == 0
+				AADD(aCountErr, {aErrors[nX][12], 1, aErrors[nX]})
+			Else
+				aCountErr[nAux][2]++
+			EndIf
+		Next
+		
+		For nX := 1 To LEN(aCountErr)
+			cMsg += STR0071 + " " + cValToChar(aCountErr[nX][2]) + " " + STR0072 + " " + CRLF + CRLF //"A ocorrência abaixo repetiu-se em" ## "funcionários:"
+			For nY := 1 TO LEN(aCountErr[nX][3])
+				cMsg += aCountErr[nX][3][nY] + CRLF
+			Next
+			cMsg += CRLF + REPLICATE("-",30) + CRLF
+		Next
+	EndIf
+	cMsg += CRLF + STR0039 //"Verifique se os dados inseridos são válidos e se é possível inserir atendentes com os valores listados acima."
+	If !ISBlind()
+		AtShowLog(cMsg,STR0040,/*lVScroll*/,/*lHScroll*/,/*lWrdWrap*/,.F.) //"Importação de Atendentes"
+	EndIf
+	lRet := .F.
+EndIf
+
+If !ISBlind()
+	oMrkBrowse:Refresh(.T.)
+EndIf
+
+If Len(aMarkFun) <> 0
+	lRet := .F.
+EndIf
+
+Return lRet
