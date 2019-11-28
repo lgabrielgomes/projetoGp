@@ -6,7 +6,7 @@
 #INCLUDE "protheus.ch"
 #INCLUDE "MSOLE.CH"
 #INCLUDE "GCTXDEF.CH"
-
+//comentario do kaique
 Static cRetChave := ""
 
 /*
