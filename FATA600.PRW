@@ -1,7 +1,7 @@
 #INCLUDE "PROTHEUS.CH"
 #INCLUDE "FATA600.CH"
 #INCLUDE "DBTREE.CH"
-#INCLUDE "FWMVCDEF.CH"                                                            
+#INCLUDE "FWMVCDEF.CH"
 
 Static aTipo09		:= {}
 Static aCronoFin	:= {}
@@ -31,59 +31,59 @@ Local aCores	:= {}															//Cores da legenda
 Local oTableAtt	:= Nil
 Local lFT600FIL	:= ExistBlock("FT600FIL")
 Local aCoresNew	:= {}
-Local lRet		:= .T.	
+Local lRet		:= .T.
 Local aAutoRot	:= {}
 Local nSeekOpt	:= 0
 Local aFT600CL	:= {}
 
 Default nOperation	:= MODEL_OPERATION_INSERT
 Default aADYMaster	:= {}
-Default aADZProduto	:= {}	
+Default aADZProduto	:= {}
 Default aADZAcessor	:= {}
 
 Private cCadastro		:= STR0001 	//"Proposta Comercial"
 Private aRotina		:= MenuDef()
-Private INCLUI		:= .F. 		// Variável declarada devido a rotina automática e chamada no Model.
-
+Private INCLUI		:= .F. 		// Variï¿½vel declarada devido a rotina automï¿½tica e chamada no Model.
+//comentario teste
 If Len( aADYMaster ) == 0
-	// Tratamento efetuado para quando chamado a proposta, da visualização de uma oportunidade.
+	// Tratamento efetuado para quando chamado a proposta, da visualizaï¿½ï¿½o de uma oportunidade.
 	If ValType(oMdlFt300) == "O"
 		nOperation	:= oMdlFt300:GetOperation()
 		If nOperation == MODEL_OPERATION_VIEW .And. nOpcADJ <> 4
 			// Se tiver proposta
 			DbSelectArea( "ADJ" )
-			DbSetOrder( 1 ) //ADJ_FILIAL+ADJ_NROPOR+ADJ_REVISA 
+			DbSetOrder( 1 ) //ADJ_FILIAL+ADJ_NROPOR+ADJ_REVISA
 			If Empty(FwFldGet("ADJ_PROPOS")) .AND. ADJ->(DbSeek(xFilial("ADJ")+FwFldGet("AD1_NROPOR")))
-				//Liberado a opção visualizar da proposta, não possivel realizar as outras opções de menu.
+				//Liberado a opï¿½ï¿½o visualizar da proposta, nï¿½o possivel realizar as outras opï¿½ï¿½es de menu.
 				aRotina := {}
 				ADD OPTION aRotina TITLE STR0023 ACTION "VIEWDEF.FATA600"	OPERATION 2 ACCESS 0 	// "Visualizar"
-				AAdd( aRotina, { STR0026, 'A600Impr' 	, 0, 6, 0, NIL } ) 	//"Impressão"
+				AAdd( aRotina, { STR0026, 'A600Impr' 	, 0, 6, 0, NIL } ) 	//"Impressï¿½o"
 			Else
 				HELP(" ",1,"REGNOIS")
 				lRet	:= .F.
 			EndIf
 		EndIf
 	EndIf
-	
+
 	If lRet
 		If ValType(oMdlFt300) == "O"
 			_oMdlOpor := oMdlFt300
 		EndIf
-		
+
 		aCores 	:= FT600Legenda()
-		
+
 		cFilter := "ADY_FILIAL == '" + xFilial("ADY") + "' .AND. ADY_OPORTU == '" + AD1->AD1_NROPOR + "'"
 		If lFT600FIL
 			cFilter += " .AND. "+ExecBlock("FT600FIL",.F.,.F.,{cFilter})
 		EndIf
 		oBrowse := FWMBrowse():New()
 		oBrowse:SetAlias('ADY')
-		
+
 		//Adiciona as Legendas no Browse
 		For nX := 1 To Len(aCores)
 			oBrowse:AddLegend( aCores[nX][1], aCores[nX][2], aCores[nX][3] )
 		Next nX
-		
+
 		//------------------------------------------
 		// Ponto de entrada que adiciona coluna ao Browse
 		//------------------------------------------
@@ -95,33 +95,33 @@ If Len( aADYMaster ) == 0
 				Next nX
 			EndIf
 			aFT600CL	:= {}
-		Endif 	
-		
+		Endif
+
 		oBrowse:SetFilterDefault(cFilter)
-		
+
 		//Adiciona no browse o campo Sincronizar para o parametro MV_FATMNTP igual a 1
 		If cValToChar( nOpcADJ ) $ "1|4"
 			aSincProp:= { STR0192, {|| IIF(ADY->ADY_SINCPR,"LBOK","LBNO")}, "C", "@BMP", 0, 1, 0, .F., {||}, .T.,,,,, .F. } //Sincronizar
 			oBrowse:AddColumn(aSincProp)
 		EndIf
-		
+
 		oBrowse:SetCacheView( .F. )
-		//Habilita as visões na proposta comercial
+		//Habilita as visï¿½es na proposta comercial
 		oBrowse:SetAttach(.T.)
 		oTableAtt := TableAttDef()
 		If oTableAtt <> Nil
 			oBrowse:SetViewsDefault(oTableAtt:aViews)
 			oBrowse:SetChartsDefault(oTableAtt:aCharts)
-			
+
 			oBrowse:SetIDChartDefault( "PorDtEmis" )
 		EndIf
-		
-		//Se não for SIGACRM inibe a exibição do gráfico
+
+		//Se nï¿½o for SIGACRM inibe a exibiï¿½ï¿½o do grï¿½fico
 		If nModulo <> 73
 			oBrowse:SetOpenChart( .F. )
 		EndIf
-		
-		oBrowse:SetCanSaveArea(.T.) 
+
+		oBrowse:SetCanSaveArea(.T.)
 		oBrowse:SetTotalDefault('ADY_PROPOS','COUNT',STR0281) // "Total de Registros"
 		oBrowse:SetChgAll(.F.)
 		oBrowse:SetSeeAll(.F.)
@@ -133,48 +133,48 @@ If Len( aADYMaster ) == 0
 	EndIf
 Else
 	//------------------------------------------
-	// Cabeçalho - Proposta 
+	// Cabeï¿½alho - Proposta
 	//------------------------------------------
 	aAdd( aAutoRot, { "ADYMASTER", aADYMaster } )
-			
+
 	//------------------------------------------
 	// Itens - Proposta (Folder Produtos)
 	//------------------------------------------
 	aAdd( aAutoRot, { "ADZPRODUTO", aADZProduto } )
-	
+
 	//------------------------------------------
-	// Itens - Proposta (Folder Acessórios)
+	// Itens - Proposta (Folder Acessï¿½rios)
 	//------------------------------------------
 	aAdd( aAutoRot, { "ADZACESSOR", aADZAcessor } )
 
 	//-------------------------------------------------------------
-	// Posiciona na oportunidade caso  o modelo não esteja ativo.  
-	//-------------------------------------------------------------			
+	// Posiciona na oportunidade caso  o modelo nï¿½o esteja ativo.
+	//-------------------------------------------------------------
 	nSeekOpt := aScan( aADYMaster, { |x| Alltrim( x[1] ) == "ADY_OPORTU" } )
-	
+
 	If nSeekOpt > 0
 		DbSelectArea( "AD1" )
-		DbSetOrder( 1 ) //AD1_FILIAL+AD1_NROPOR+AD1_REVISA                                                                                                                                	
+		DbSetOrder( 1 ) //AD1_FILIAL+AD1_NROPOR+AD1_REVISA
 		If DbSeek( xFilial("AD1") + aADYMaster[nSeekOpt][2] )
 			_oMdlOpor := FwLoadModel( 'FATA300' )
 			_oMdlOpor:SetOperation( MODEL_OPERATION_UPDATE )
 			_oMdlOpor:Activate()
 			//------------------------------------------
-			// Rotina Automatica através do MVC  
+			// Rotina Automatica atravï¿½s do MVC
 			//------------------------------------------
 			If nOperation == MODEL_OPERATION_INSERT
 				INCLUI := .T.
 			EndIf
 			FwMvcRotAuto( ModelDef(), "ADY", nOperation, aAutoRot, /*lSeek*/, .T. )
-		Else 
-			Help( ,, 'A600EXECAUTO1',, STR0323, 1, 0 )//"O número da oportunidade informado não foi encontrado, sendo assim, a execução da rotina automática não será efetuada."
+		Else
+			Help( ,, 'A600EXECAUTO1',, STR0323, 1, 0 )//"O nï¿½mero da oportunidade informado nï¿½o foi encontrado, sendo assim, a execuï¿½ï¿½o da rotina automï¿½tica nï¿½o serï¿½ efetuada."
 		EndIf
 	Else
-		Help( ,, 'A600EXECAUTO2',, STR0324, 1, 0 )//"Não foi informado o número da Oportunidade de Vendas, sendo assim, a execução da rotina automática não será efetuada."                                                                                                                                                                                                                                                                                                                                                                                             
+		Help( ,, 'A600EXECAUTO2',, STR0324, 1, 0 )//"Nï¿½o foi informado o nï¿½mero da Oportunidade de Vendas, sendo assim, a execuï¿½ï¿½o da rotina automï¿½tica nï¿½o serï¿½ efetuada."
 	EndIf
-	
+
 EndIf
-	
+
 _oMdlOpor := Nil
 
 RestArea( aArea )
@@ -183,13 +183,13 @@ Return Nil
 //------------------------------------------------------------------------------
 /*/	{Protheus.doc} TableAttDef
 
-Cria as visões e gráficos padrão.
+Cria as visï¿½es e grï¿½ficos padrï¿½o.
 
 @sample	TableAttDef()
 
 @param		Nenhum
 
-@return	ExpA - Array de Objetos com as Visoes e Gráficos.
+@return	ExpA - Array de Objetos com as Visoes e Grï¿½ficos.
 
 @author	Aline Kokumai
 @since		02/05/2014
@@ -200,54 +200,54 @@ Static Function TableAttDef()
 
 Local oTableAtt		:= FWTableAtt():New()
 Local oPorStatus	:= Nil // Pizza: Proposta Comercial por Status
-Local oPorDtEmis	:= Nil // Colunas: Proposta Por Data de Emissão
-Local oPropSinc		:= Nil // Visão: Oportunidades Sincronizadas
+Local oPorDtEmis	:= Nil // Colunas: Proposta Por Data de Emissï¿½o
+Local oPropSinc		:= Nil // Visï¿½o: Oportunidades Sincronizadas
 
 oTableAtt:SetAlias("ADY")
 
 // Proposta Sincronizada
 oPropSinc := FWDSView():New()
 oPropSinc:SetName(STR0260)	//"Proposta Sincronizada"
-oPropSinc:SetID("PropSinc")	
+oPropSinc:SetID("PropSinc")
 oPropSinc:SetOrder(1) // ADY_FILIAL+ADY_PROPOS+ADY_PREVIS
 oPropSinc:SetCollumns({	"ADY_PROPOS", "ADY_PREVIS", "ADY_OPORTU", "ADY_REVISA", "ADY_ENTIDA", "ADY_CODIGO",;
 					 	"ADY_LOJA", "ADY_DESENT","ADY_TABELA", "ADY_STATUS", "ADY_VEND", "ADY_MSBLQL"})
 oPropSinc:SetPublic( .T. )
 oPropSinc:AddFilter(STR0260, "ADY_SINCPR == .T.")
-oTableAtt:AddView(oPropSinc)	
+oTableAtt:AddView(oPropSinc)
 
 // GRAFICOS
 // Pizza: Proposta Comercial por Status
 oPorStatus := FWDSChart():New()
 oPorStatus:SetName(STR0261)	//"Proposta Comercial por Status"
 oPorStatus:SetTitle(STR0261)
-oPorStatus:SetID("PorStatus")	
+oPorStatus:SetID("PorStatus")
 oPorStatus:SetType("PIECHART")
 oPorStatus:SetSeries({ {"ADY", "ADY_PROPOS", "COUNT"} })
 oPorStatus:SetCategory( { {"ADY", "ADY_STATUS"} } )
 oPorStatus:SetPublic( .T. )
 oPorStatus:SetLegend( CONTROL_ALIGN_BOTTOM ) //Inferior
-oPorStatus:SetTitleAlign( CONTROL_ALIGN_CENTER ) 			
+oPorStatus:SetTitleAlign( CONTROL_ALIGN_CENTER )
 oTableAtt:AddChart(oPorStatus)
 
-// Colunas: Proposta Por Data de Emissão
+// Colunas: Proposta Por Data de Emissï¿½o
 oPorDtEmis := FWDSChart():New()
-oPorDtEmis:SetName(STR0264)	//"Proposta Por Data de Emissão"
+oPorDtEmis:SetName(STR0264)	//"Proposta Por Data de Emissï¿½o"
 oPorDtEmis:SetTitle(STR0264)
-oPorDtEmis:SetID("PorDtEmis")	
+oPorDtEmis:SetID("PorDtEmis")
 oPorDtEmis:SetType("BARCOMPCHART")
 oPorDtEmis:SetSeries({ {"ADY", "ADY_PROPOS", "COUNT"} })
 oPorDtEmis:SetCategory( { {"ADY", "ADY_DATA"} } )
 oPorDtEmis:SetPublic( .T. )
 oPorDtEmis:SetLegend( CONTROL_ALIGN_BOTTOM ) //Inferior
-oPorDtEmis:SetTitleAlign( CONTROL_ALIGN_CENTER ) 		
+oPorDtEmis:SetTitleAlign( CONTROL_ALIGN_CENTER )
 oTableAtt:AddChart(oPorDtEmis)
 
 Return (oTableAtt)
 
 //--------------------------------------------------------------------------------------------------------------------
 /*/{Protheus.doc} MenuDef
-Definição do MenuDef
+Definiï¿½ï¿½o do MenuDef
 
 @return ExpO, Array, aRotina
 
@@ -270,45 +270,45 @@ ADD OPTION aRotina TITLE  STR0025  ACTION  "VIEWDEF.FATA600" OPERATION 4 ACCESS 
 ADD OPTION aRotina TITLE  STR0335  ACTION  "VIEWDEF.FATA600" OPERATION 5 ACCESS 0 // "Excluir"
 ADD OPTION aRotina TITLE  STR0191  ACTION  "VIEWDEF.FATA600" OPERATION 9 ACCESS 0 // "Copiar"
 
-AAdd( aRotina, { STR0026, 'A600Impr' 	, 0, 6, 0, NIL } ) //"Impressão"
-aAdd( aRotina, { STR0190, 'A600CompPr' , 0, 7, 0, NIL } ) //"Comparar Propostas" 
-	
+AAdd( aRotina, { STR0026, 'A600Impr' 	, 0, 6, 0, NIL } ) //"Impressï¿½o"
+aAdd( aRotina, { STR0190, 'A600CompPr' , 0, 7, 0, NIL } ) //"Comparar Propostas"
+
 If nModulo == 28
 	AAdd( aRotina, { STR0219, "A600SerRes", 0, 4,, .T. }  ) // "Reservar Equip."
 EndIf
 
 If nModulo == 73
-	
+
 	aEntRelac := CRMXINCROT( "ADY", aEntRelac )
 
-	ADD OPTION aEntRelac TITLE STR0235   ACTION "CRMA200()"	 OPERATION  8 ACCESS 0  //"Privilégios"
+	ADD OPTION aEntRelac TITLE STR0235   ACTION "CRMA200()"	 OPERATION  8 ACCESS 0  //"Privilï¿½gios"
 
 	nPos := ASCAN(aEntRelac, { |x|  x[2] == "CRMA190Con()" })
-	If nPos > 0 
+	If nPos > 0
 		ADD OPTION aRotina TITLE aEntRelac[nPos][1] ACTION aEntRelac[nPos][2] OPERATION 8  ACCESS 0//"Conectar"
 		Adel(aEntRelac,nPos)
 		Asize(aEntRelac,Len(aEntRelac)-1)
 	EndIf
-	
+
 	nPos := ASCAN(aEntRelac, { |x|  IIF(ValType(x[2]) == "C", x[2] == "CRMA180()", Nil) })
 	If nPos > 0
-		ADD OPTION aAtiv   TITLE STR0231 ACTION "CRMA180(,,,3,,)" OPERATION 3  ACCESS 0 //"Nova Atividade" 
+		ADD OPTION aAtiv   TITLE STR0231 ACTION "CRMA180(,,,3,,)" OPERATION 3  ACCESS 0 //"Nova Atividade"
 		ADD OPTION aAtiv   TITLE STR0232 ACTION "CRMA180()" OPERATION 8  ACCESS 0 //"Todas as ATividades"
 		aEntRelac[nPos][2] := aAtiv
 	EndIf
 
 	nPos := ASCAN(aEntRelac, { |x|  IIF(ValType(x[2]) == "C", x[2] == "CRMA090()", Nil) })
 	If nPos > 0
-		ADD OPTION aAnotac   TITLE STR0233 ACTION "CRMA090(3)" OPERATION 3  ACCESS 0 //"Nova Anotação"
-		ADD OPTION aAnotac   TITLE STR0234 ACTION "CRMA090()" OPERATION 8  ACCESS 0 //"Todas as Anotações" 
+		ADD OPTION aAnotac   TITLE STR0233 ACTION "CRMA090(3)" OPERATION 3  ACCESS 0 //"Nova Anotaï¿½ï¿½o"
+		ADD OPTION aAnotac   TITLE STR0234 ACTION "CRMA090()" OPERATION 8  ACCESS 0 //"Todas as Anotaï¿½ï¿½es"
 		aEntRelac[nPos][2] := aAnotac
 	EndIf
 EndIf
 
-//copia é desativada enquanto o novo fata600 da totvs12 nao descer para o padrão
+//copia ï¿½ desativada enquanto o novo fata600 da totvs12 nao descer para o padrï¿½o
 If nModulo == 28
 	nPos := ASCAN(aRotina, { |x|  x[1] == "Copiar" })
-	If nPos > 0 
+	If nPos > 0
 		Adel(aRotina,nPos)
 		Asize(aRotina,Len(aRotina)-1)
 	EndIf
@@ -322,7 +322,7 @@ Return aRotina
 
 //-------------------------------------------------------------------
 /*/{Protheus.doc} ModelDef
-Definição do modelo de Dados
+Definiï¿½ï¿½o do modelo de Dados
 
 @author luiz.jesus
 @since 18/03/2014
@@ -339,18 +339,18 @@ Local lFta600MDL	:= ExistBlock("FATA600MDL")
 
 Local oStructFke	:= FWFormModelStruct():New()
 
-Local oStrADY		:= FWFormStruct(1,'ADY')			//Cabeçalho da Proposta Comercial
+Local oStrADY		:= FWFormStruct(1,'ADY')			//Cabeï¿½alho da Proposta Comercial
 Local oStrADZPro	:= FWFormStruct(1,'ADZ')			//Itens da Proposta Comercial
 Local oStrADZAce	:= FWFormStruct(1,'ADZ')			//Itens da Proposta Comercial
 
-Local oStrGINVE	:= FWFormStruct(1,'GIN')			//Pasta Percurso 
+Local oStrGINVE	:= FWFormStruct(1,'GIN')			//Pasta Percurso
 Local oStrGIOVE	:= FWFormStruct(1,'GIO')			//Pasta Custos
 Local oStrGIPVE	:= FWFormStruct(1,'GIP')			//Pasta Veiculos
 
-//Blocos de validação
-Local bLinePost		:= {|oModel, nLine| At600LOk(oModel, nLine)}  	//Pré-Validação da linha
-Local bPosVldLin		:= {|oModel| At600VPsLn(oModel)} 	//Pós-Validação da linha
-Local bTudoOk			:= {|oModel| At600TOk(oModel)}	 	//Pós-Validação do Model
+//Blocos de validaï¿½ï¿½o
+Local bLinePost		:= {|oModel, nLine| At600LOk(oModel, nLine)}  	//Prï¿½-Validaï¿½ï¿½o da linha
+Local bPosVldLin		:= {|oModel| At600VPsLn(oModel)} 	//Pï¿½s-Validaï¿½ï¿½o da linha
+Local bTudoOk			:= {|oModel| At600TOk(oModel)}	 	//Pï¿½s-Validaï¿½ï¿½o do Model
 Local bCommit			:= {|oModel| At600Commit(oModel)} 	//Commit do Model
 Local bCancel			:= {|oModel| At600Cancel(oModel)} 	//Cancelamento da Proposta
 Local bLoadCro		:= {|| {}}
@@ -360,21 +360,21 @@ Local bVldActive		:= {|oModel| FT600VldActivate(oModel)}
 
 oStructFke:AddTable("ZYY",{},STR0267) //"Cronograma"
 
-//----------------Estrutura para criação do campo-----------------------------
+//----------------Estrutura para criaï¿½ï¿½o do campo-----------------------------
 // [01] C Titulo do campo
 // [02] C ToolTip do campo
 // [03] C identificador (ID) do Field
 // [04] C Tipo do campo
 // [05] N Tamanho do campo
 // [06] N Decimal do campo
-// [07] B Code-block de validação do campo
-// [08] B Code-block de validação When do campo
+// [07] B Code-block de validaï¿½ï¿½o do campo
+// [08] B Code-block de validaï¿½ï¿½o When do campo
 // [09] A Lista de valores permitido do campo
-// [10] L Indica se o campo tem preenchimento obrigatório
+// [10] L Indica se o campo tem preenchimento obrigatï¿½rio
 // [11] B Code-block de inicializacao do campo
 // [12] L Indica se trata de um campo chave
-// [13] L Indica se o campo pode receber valor em uma operação de update.
-// [14] L Indica se o campo é virtual
+// [13] L Indica se o campo pode receber valor em uma operaï¿½ï¿½o de update.
+// [14] L Indica se o campo ï¿½ virtual
 
 oStructFke:AddField(STR0268, STR0269, "ZYY_FILIAL", "C", FwSizeFilial(), 0)								//"Filial"//"Filial do Sistema"
 oStructFke:AddField(STR0270, STR0270, "ZYY_PARCE",  "C", GetSX3Cache("E1_PARCELA","X3_TAMANHO"), 0)	//Parcela
@@ -387,13 +387,13 @@ Ft600TAddADZ( oStrADZAce, "ADZACESSOR" )
 aAux1 := FwStruTrigger("GIO_CUSTO","GIO_VALTOT","A600GIOCUSTO()",.F.,Nil,Nil,Nil)
 oStrGIOVE:AddTrigger(aAux1[1],aAux1[2],aAux1[3],aAux1[4])
 
-//Inicializa a revisão quando é inclusão
+//Inicializa a revisï¿½o quando ï¿½ inclusï¿½o
 If INCLUI
-	oStrADY:SetProperty("ADY_PREVIS",MODEL_FIELD_INIT,FwBuildFeature(STRUCT_FEATURE_INIPAD,"StrZero(1,GetSX3Cache('ADY_PREVIS','X3_TAMANHO'),0)"))	// Revisão
-	oStrADY:SetProperty("ADY_TABELA",MODEL_FIELD_INIT,FwBuildFeature(STRUCT_FEATURE_INIPAD,"AD1->AD1_TABELA"))											// tabela de preços da oportunidade
+	oStrADY:SetProperty("ADY_PREVIS",MODEL_FIELD_INIT,FwBuildFeature(STRUCT_FEATURE_INIPAD,"StrZero(1,GetSX3Cache('ADY_PREVIS','X3_TAMANHO'),0)"))	// Revisï¿½o
+	oStrADY:SetProperty("ADY_TABELA",MODEL_FIELD_INIT,FwBuildFeature(STRUCT_FEATURE_INIPAD,"AD1->AD1_TABELA"))											// tabela de preï¿½os da oportunidade
 EndIf
 
-//Para modulo Gestão de Serviço campo não é Necessario Ser Obrigatorio 
+//Para modulo Gestï¿½o de Serviï¿½o campo nï¿½o ï¿½ Necessario Ser Obrigatorio
 If nModulo == 28
 	oStrADY:SetProperty('ADY_TABELA' ,MODEL_FIELD_OBRIGAT,.F.)
 	oStrADY:SetProperty('ADY_TABELA' ,MODEL_FIELD_WHEN   , {|| oModel:GetValue( "ADYMASTER", "ADY_TPCONT" ) <> "4"} )
@@ -413,8 +413,8 @@ oStrADZPro:SetProperty("ADZ_PRODUT",MODEL_FIELD_VALID,FwBuildFeature( STRUCT_FEA
 oStrADZAce:SetProperty("ADZ_PRODUT",MODEL_FIELD_VALID,FwBuildFeature( STRUCT_FEATURE_VALID,"Ft600VProd('ADZACESSOR') .And. " + cValidUser ) )
 
 cValidUser := FT600VldUser( "ADZ_PRDALO" )
-oStrADZPro:SetProperty("ADZ_PRDALO",MODEL_FIELD_VALID,FwBuildFeature(STRUCT_FEATURE_VALID,"At600VdAlo(1) .And. " + cValidUser ) ) 
-oStrADZAce:SetProperty("ADZ_PRDALO",MODEL_FIELD_VALID,FwBuildFeature(STRUCT_FEATURE_VALID,"At600VdAlo(2) .And. " + cValidUser ) ) 
+oStrADZPro:SetProperty("ADZ_PRDALO",MODEL_FIELD_VALID,FwBuildFeature(STRUCT_FEATURE_VALID,"At600VdAlo(1) .And. " + cValidUser ) )
+oStrADZAce:SetProperty("ADZ_PRDALO",MODEL_FIELD_VALID,FwBuildFeature(STRUCT_FEATURE_VALID,"At600VdAlo(2) .And. " + cValidUser ) )
 
 cValidUser := FT600VldUser( "ADZ_CONDPG" )
 oStrADZPro:SetProperty("ADZ_CONDPG",MODEL_FIELD_VALID,FwBuildFeature(STRUCT_FEATURE_VALID," ExistCpo('SE4') .AND. A600VldCPg('ADZPRODUTO') .And. " + cValidUser + ".And. A600VTP09 ('ADZPRODUTO')") )
@@ -426,11 +426,11 @@ oStrADZAce:SetProperty("ADZ_PRCVEN",MODEL_FIELD_OBRIGAT,.F.)
 oStrADZAce:SetProperty('ADZ_TOTAL'	,MODEL_FIELD_OBRIGAT,.F.)
 
 //----------------------------------------------------------------------------------------------------------------------
-// Retira a obrigatoriedade da tabela quando é utilizado agrupador, pois neste caso, será utilizado a tabela de preços 
-// das regras de comercialização por item
+// Retira a obrigatoriedade da tabela quando ï¿½ utilizado agrupador, pois neste caso, serï¿½ utilizado a tabela de preï¿½os
+// das regras de comercializaï¿½ï¿½o por item
 //----------------------------------------------------------------------------------------------------------------------
 If SuperGetMv( "MV_FATMNTP",, 1 ) == 4
-	oStrADY:SetProperty( "ADY_TABELA", MODEL_FIELD_OBRIGAT, .F. ) 	
+	oStrADY:SetProperty( "ADY_TABELA", MODEL_FIELD_OBRIGAT, .F. )
 EndIf
 
 oModel	:= MPFormModel():New('FATA600' /*<cID>*/,;
@@ -466,22 +466,22 @@ oModel:addGrid('CRONOFIN' /*<cId>*/,;
                /*<bPost>*/,;
                bLoadCro /*<bLoadGrid>*/)
 
-If nModulo == 88 //Gestão de Transporte de Passageiros
+If nModulo == 88 //Gestï¿½o de Transporte de Passageiros
 
 	//-------------------------------------------------------------------------------------------------+
-	// Campos Quantidade e Custo unitario não podem ser alterados, quando o custo for do tipo pedágio. |
+	// Campos Quantidade e Custo unitario nï¿½o podem ser alterados, quando o custo for do tipo pedï¿½gio. |
 	// ------------------------------------------------------------------------------------------------+
-	oStrGIOVE:SetProperty('GIO_QUANT'	, MODEL_FIELD_WHEN, {|| oModel:GetValue( "GIOCUSTOS", "GIO_UM" ) <> "PD"}) 
-	oStrGIOVE:SetProperty('GIO_CUSUNI', MODEL_FIELD_WHEN, {|| oModel:GetValue( "GIOCUSTOS", "GIO_UM" ) <> "PD"}) 	
+	oStrGIOVE:SetProperty('GIO_QUANT'	, MODEL_FIELD_WHEN, {|| oModel:GetValue( "GIOCUSTOS", "GIO_UM" ) <> "PD"})
+	oStrGIOVE:SetProperty('GIO_CUSUNI', MODEL_FIELD_WHEN, {|| oModel:GetValue( "GIOCUSTOS", "GIO_UM" ) <> "PD"})
 
 	oModel:AddGrid("GINVIAESP", "ADYMASTER", oStrGINVE , , { |oModelGrid| PrVLinGIN(oModelGrid , @oModel)})
 	oModel:AddGrid('GIOCUSTOS', 'ADYMASTER', oStrGIOVE,/*{||Ft600LinePre()}*/,/*bLinePost*/, /*bPreVal*/,/*bPosVldLin*/)
 	oModel:AddGrid('GIPVEICULO','ADYMASTER', oStrGIPVE,/*{||Ft600LinePre()}*/,/*bLinePost*/, /*bPreVal*/,/*bPosVldLin*/)
-	
+
 	oModel:SetRelation('GINVIAESP',{{'GIN_FILIAL','xFilial("GIN")'},{"GIN_PROPOS","ADY_PROPOS"}},GIN->(IndexKey(1)))
 	oModel:SetRelation('GIOCUSTOS',{{'GIO_FILIAL','xFilial("GIO")'},{"GIO_PROPOS","ADY_PROPOS"}},GIO->(IndexKey(1)))
 	oModel:SetRelation('GIPVEICULO',{{'GIP_FILIAL','xFilial("GIP")'},{"GIP_PROPOS","ADY_PROPOS"}},GIP->(IndexKey(1)))
-			
+
 	oModel:GetModel("GIOCUSTOS"):SetUniqueLine({"GIO_CUSTO"})
 
 	// ----------------------------------+
@@ -491,14 +491,14 @@ If nModulo == 88 //Gestão de Transporte de Passageiros
 
 EndIf
 
-oModel:GetModel('ADYMASTER'):SetDescription(STR0252)	//"Cabeçalho da Proposta"
-oModel:GetModel('ADZPRODUTO'):SetDescription(STR0236)	//"Produto" 
+oModel:GetModel('ADYMASTER'):SetDescription(STR0252)	//"Cabeï¿½alho da Proposta"
+oModel:GetModel('ADZPRODUTO'):SetDescription(STR0236)	//"Produto"
 oModel:GetModel('ADZACESSOR'):SetDescription(STR0237)	//'Acessorio'
 
-If nModulo == 88 //Gestão de Transporte de Passageiros
+If nModulo == 88 //Gestï¿½o de Transporte de Passageiros
 	oModel:GetModel('GINVIAESP'):SetDescription(STR0306)   //"Percurso"
 	oModel:GetModel('GIOCUSTOS'):SetDescription(STR0294)   //"Custos""
-	oModel:GetModel('GIPVEICULO'):SetDescription(STR0295)  //"Veículos"
+	oModel:GetModel('GIPVEICULO'):SetDescription(STR0295)  //"Veï¿½culos"
 EndIf
 
 //Realiza o relacionamento
@@ -508,7 +508,7 @@ oModel:SetRelation('ADZACESSOR',{{'ADZ_FILIAL','xFilial("ADZ")'},{"ADZ_PROPOS","
 // --------------+
 // TOTALIZADORES |
 // --------------+
-//-- Total Geral de Produto 
+//-- Total Geral de Produto
 oModel:AddCalc('CALC' /*cId*/,;
                'ADYMASTER' /*cOwner*/,;
                'ADZPRODUTO' /*cIdForm*/,;
@@ -520,7 +520,7 @@ oModel:AddCalc('CALC' /*cId*/,;
                STR0283 /*cTitle*/,; // 'Total Geral de Produto'
                {|oMdlCalc,nTotal,xValor,lSum| A600RdpTot(oMdlCalc,nTotal,xValor,lSum,'ADZPRODUTO','ADZ__TOTPRD') },;
                /*nTamanho*/,;
-               /*nDecimal*/)  
+               /*nDecimal*/)
 //-- Total Geral de Acessorio
 oModel:AddCalc('CALC' /*cId*/,;
                'ADYMASTER' /*cOwner*/,;
@@ -548,17 +548,17 @@ oModel:AddCalc('CALC' /*cId*/,;
                nTamTot /*nTamanho*/,;
                nDecTot /*nDecimal*/)
 
-If nModulo == 88 //Gestão de Transporte de Passageiros
+If nModulo == 88 //Gestï¿½o de Transporte de Passageiros
 	oModel:AddCalc('CALC', 'ADYMASTER', 'GIOCUSTOS', 'GIO_VALTOT', 'GIO__CUSTOS', 'SUM', /*bCondition*/, /*bInitValue*/, STR0405 /*cTitle*/, /*bFormula*/) //"Total Geral de Custo Final"
 Endif
-	
+
 oModel:GetModel('CALC'):AddEvents('CALC',"ADZ__TOTPRO","ADZ__TOTACE",{|| .T. })	//"Total" 'Acessorio'
 
-//Utilização da grid antiga (GetDados())
+//Utilizaï¿½ï¿½o da grid antiga (GetDados())
 oModel:GetModel("ADZPRODUTO"):SetUseOldGrid( .T. )
 
-//Para o modulo Gestao de Servicos desabilita edicao da grid de produtos na proposta comercial 
-If nModulo == 28 
+//Para o modulo Gestao de Servicos desabilita edicao da grid de produtos na proposta comercial
+If nModulo == 28
 	oModel:GetModel('ADZPRODUTO'):SetNoInsertLine( .T. )
 	oModel:GetModel('ADZPRODUTO'):SetNoDeleteLine( .T. )
 	oModel:GetModel('ADZPRODUTO'):SetNoUpdateLine( .T. )
@@ -568,10 +568,10 @@ Endif
 oModel:GetModel("ADZACESSOR"):SetOptional(.T.)
 oModel:GetModel("CRONOFIN"):SetOptional(.T.)
 
-//Utilização da grid antiga (GetDados())
+//Utilizaï¿½ï¿½o da grid antiga (GetDados())
 oModel:GetModel("ADZACESSOR"):SetUseOldGrid( .T. )
 
-//Desabilita o Cronograma financeiro para edição e no commit
+//Desabilita o Cronograma financeiro para ediï¿½ï¿½o e no commit
 oModel:GetModel('CRONOFIN'):SetNoInsertLine( .T. )
 oModel:GetModel('CRONOFIN'):SetNoDeleteLine( .T. )
 oModel:GetModel('CRONOFIN'):SetNoUpdateLine( .T. )
@@ -579,13 +579,13 @@ oModel:GetModel('CRONOFIN'):SetNoUpdateLine( .T. )
 //Desabilita o model para o commit
 oModel:GetModel('CRONOFIN'):SetOnlyQuery(.T.)
 
-oModel:SetVldActivate( bVldActive ) 
+oModel:SetVldActivate( bVldActive )
 
 //Inicializa cronograma financeiro
 oModel:SetActivate(bActive)
 
 // ---------------------------------------------------------+
-// Ponto de entada para adição de totalizadores customizados|
+// Ponto de entada para adiï¿½ï¿½o de totalizadores customizados|
 // ---------------------------------------------------------+
 If lFta600MDL
 	ExecBlock("FATA600MDL" ,.F. ,.F. ,{oModel})
@@ -607,13 +607,13 @@ Local nOperation	:= oModel:GetOperation()
 
 If ( !Empty( _oMdlOpor ) .And. _oMdlOpor:IsActive() .And. _oMdlOpor:GetOperation() == MODEL_OPERATION_VIEW )
 	If nOperation == MODEL_OPERATION_INSERT
-		Help(,,"FT600VLDACT",, STR0336 + STR0024 + STR0337, 1, 0 ) //"Não é possível #Incluir# proposta devido a operação da oportunidade ser visualização."
+		Help(,,"FT600VLDACT",, STR0336 + STR0024 + STR0337, 1, 0 ) //"Nï¿½o ï¿½ possï¿½vel #Incluir# proposta devido a operaï¿½ï¿½o da oportunidade ser visualizaï¿½ï¿½o."
 		lRet := .F.
 	ElseIf nOperation == MODEL_OPERATION_UPDATE
-		Help(,,"FT600VLDACT",, STR0336 + STR0025 + STR0337, 1, 0 ) //"Não é possível #Alterar# proposta devido a operação da oportunidade ser visualização."
+		Help(,,"FT600VLDACT",, STR0336 + STR0025 + STR0337, 1, 0 ) //"Nï¿½o ï¿½ possï¿½vel #Alterar# proposta devido a operaï¿½ï¿½o da oportunidade ser visualizaï¿½ï¿½o."
 		lRet := .F.
 	ElseIf nOperation == MODEL_OPERATION_DELETE
-		Help(,,"FT600VLDACT",, STR0336 + STR0335 + STR0337, 1, 0 ) //"Não é possível #Excluir# proposta devido a operação da oportunidade ser visualização."
+		Help(,,"FT600VLDACT",, STR0336 + STR0335 + STR0337, 1, 0 ) //"Nï¿½o ï¿½ possï¿½vel #Excluir# proposta devido a operaï¿½ï¿½o da oportunidade ser visualizaï¿½ï¿½o."
 		lRet := .F.
 	EndIf
 EndIf
@@ -631,7 +631,7 @@ Return( lRet )
 
 //-------------------------------------------------------------------
 /*/{Protheus.doc} ViewDef
-Definição do interface
+Definiï¿½ï¿½o do interface
 
 @author luiz.jesus
 @since 18/03/2014
@@ -646,40 +646,40 @@ Local oStrADY		:= FWFormStruct(2, 'ADY')
 Local oStrADZPro	:= FWFormStruct(2, 'ADZ')
 Local oStrADZAce	:= FWFormStruct(2, 'ADZ')
 Local oStructFke	:= FWFormViewStruct():New()
-Local oStrGINVE		:= FWFormStruct(2, 'GIN') 
-Local oStrGIOVE		:= FWFormStruct(2, 'GIO') 
-Local oStrGIPVE		:= FWFormStruct(2, 'GIP') 
+Local oStrGINVE		:= FWFormStruct(2, 'GIN')
+Local oStrGIOVE		:= FWFormStruct(2, 'GIO')
+Local oStrGIPVE		:= FWFormStruct(2, 'GIP')
 Local oStr4			:= FWCalcStruct(oModel:GetModel('CALC'))
 Local lMultVist	 	:= SuperGetMv("MV_MULVIST",,.F.)   				// Multipla Vistorias
 Local nOpcADJ 		:= SuperGetMv("MV_FATMNTP",,1) 					//Tratamento do dado na ADJ
 Local lFT600BUT		:= ExistBlock("FT600BUT") 						//Ponto de entrada para adicionar botoes na EnchoiceBar
 Local lFT600APRV	:= ExistBlock("FT600APRV")						//Ponto de entrada para indicar se serao exibidos as funcoes de aprovacao da proposta
 Local lPyme			:= IIF(Type("__lPyme") <> "U",__lPyme,.F.)					// Serie 3 do Protheus
-Local lAprova		:= .F.                                                                                //Indica se as opções de aprovação devem ser exibidas no Ações Relacionadas
+Local lAprova		:= .F.                                                                                //Indica se as opï¿½ï¿½es de aprovaï¿½ï¿½o devem ser exibidas no Aï¿½ï¿½es Relacionadas
 Local aButtons		:= {}
 Local oMdlPROD		:= oModel:GetModel('ADZPRODUTO')
 Local oMdlACES		:= oModel:GetModel('ADZACESSOR')
-Local lGeraOrc		:= SuperGetMv("MV_CRMGORC",,.T.) // O pedido de vendas não será mais gerado de forma automática ao desabilitar o parâmetro. (Inicialmente criado para atender à TDI para não gravar mais CJ e CK, ao desabilitá-lo).
+Local lGeraOrc		:= SuperGetMv("MV_CRMGORC",,.T.) // O pedido de vendas nï¿½o serï¿½ mais gerado de forma automï¿½tica ao desabilitar o parï¿½metro. (Inicialmente criado para atender ï¿½ TDI para nï¿½o gravar mais CJ e CK, ao desabilitï¿½-lo).
 Local lOrcSimp	 	:= SuperGetMV('MV_ORCSIMP',, '2') == '1' .AND. HasOrcSimp()
 
-//----------------Estrutura para criação do campo-----------------------------
+//----------------Estrutura para criaï¿½ï¿½o do campo-----------------------------
 // [01] C Nome do Campo
 // [02] C Ordem
 // [03] C Titulo do campo
-// [04] C Descrição do campo
+// [04] C Descriï¿½ï¿½o do campo
 // [05] A Array com Help
 // [06] C Tipo do campo
 // [07] C Picture
 // [08] B Bloco de Picture Var
 // [09] C Consulta F3
-// [10] L Indica se o campo é evitável
+// [10] L Indica se o campo ï¿½ evitï¿½vel
 // [11] C Pasta do campo
 // [12] C Agrupamento do campo
 // [13] A Lista de valores permitido do campo (Combo)
-// [14] N Tamanho Maximo da maior opção do combo
+// [14] N Tamanho Maximo da maior opï¿½ï¿½o do combo
 // [15] C Inicializador de Browse
-// [16] L Indica se o campo é virtual
-// [17] C Picture Variável
+// [16] L Indica se o campo ï¿½ virtual
+// [17] C Picture Variï¿½vel
 
 oStructFke:AddField("ZYY_PARCE","01",STR0270,STR0270,{STR0270},"C","@!",Nil,Nil,.F.,Nil)	//"Parcela"
 oStructFke:AddField("ZYY_VENC","02",STR0271,STR0271,{STR0271},"D",,Nil,Nil,.F.,Nil)	//"Vencimento"
@@ -688,23 +688,23 @@ oStructFke:AddField("ZYY_TOTAL","03",STR0272,STR0272,{STR0272},"N",PesqPict("ADZ
 oView := FWFormView():New()
 oView:SetModel(oModel)
 
-//Adiciona os botões em ações relacionadas
-oView:AddUserButton(STR0010,"",{|| A600Servicos(oModel) },,,{MODEL_OPERATION_INSERT,MODEL_OPERATION_UPDATE}) //"Serviços (PMS)"
+//Adiciona os botï¿½es em aï¿½ï¿½es relacionadas
+oView:AddUserButton(STR0010,"",{|| A600Servicos(oModel) },,,{MODEL_OPERATION_INSERT,MODEL_OPERATION_UPDATE}) //"Serviï¿½os (PMS)"
 oView:AddUserButton(STR0058,"",{|| Ft600Impos() },,,{MODEL_OPERATION_VIEW,MODEL_OPERATION_UPDATE} )			//"Impostos"
 oView:AddUserButton(STR0017,"",{|| A600TimeV() },,,{MODEL_OPERATION_VIEW,MODEL_OPERATION_UPDATE} )			//"Time de vendas"
 If nOpcADJ <> 4
 	oView:AddUserButton(STR0291,"",{|| FT600Cat(oModel)},,VK_F4,{MODEL_OPERATION_INSERT,MODEL_OPERATION_VIEW,MODEL_OPERATION_UPDATE})		//'Categoria'
 Else
-	oView:AddUserButton(STR0319,"",{|| FT600AGrup(oModel),oView:Refresh() },,VK_F4,{MODEL_OPERATION_INSERT,MODEL_OPERATION_UPDATE})		//'Agrupadores' ### "Informe a tabela de preços"
+	oView:AddUserButton(STR0319,"",{|| FT600AGrup(oModel),oView:Refresh() },,VK_F4,{MODEL_OPERATION_INSERT,MODEL_OPERATION_UPDATE})		//'Agrupadores' ### "Informe a tabela de preï¿½os"
 EndIf
 
 If nModulo == 88
-	oView:AddUserButton(STR0307,"",{|oView|If( oModel:getModel('GIOCUSTOS'):Length() < 1 .Or. Empty(FwFldGet("GIO_CUSTO")), Aviso(STR0308, STR0309, {"Ok"} ), GTPA140A(oView)) },,,{MODEL_OPERATION_INSERT,MODEL_OPERATION_UPDATE,MODEL_OPERATION_VIEW} ) // "Calcular Custo" # "Planilha de Custos" # "É necessário existir pelo menos uma linha na aba 'Custos', para acionar essa opção"
-	// Adiciona o botão para impressão do contrato, apenas na visualização e quando a oportunidade estiver encerrada
+	oView:AddUserButton(STR0307,"",{|oView|If( oModel:getModel('GIOCUSTOS'):Length() < 1 .Or. Empty(FwFldGet("GIO_CUSTO")), Aviso(STR0308, STR0309, {"Ok"} ), GTPA140A(oView)) },,,{MODEL_OPERATION_INSERT,MODEL_OPERATION_UPDATE,MODEL_OPERATION_VIEW} ) // "Calcular Custo" # "Planilha de Custos" # "ï¿½ necessï¿½rio existir pelo menos uma linha na aba 'Custos', para acionar essa opï¿½ï¿½o"
+	// Adiciona o botï¿½o para impressï¿½o do contrato, apenas na visualizaï¿½ï¿½o e quando a oportunidade estiver encerrada
 	If oModel:GetOperation() == MODEL_OPERATION_VIEW .And. AD1->AD1_STATUS == "9"
-		oView:AddUserButton(STR0310,"",{|oView| Ft600ImpCo(oView) },,,{MODEL_OPERATION_VIEW} )	// "Imp. Contrato"	
+		oView:AddUserButton(STR0310,"",{|oView| Ft600ImpCo(oView) },,,{MODEL_OPERATION_VIEW} )	// "Imp. Contrato"
 	Endif
-	
+
 	//---------------------------------------------------------------+
 	// Soma Valor pedagio ida/volta e atualiza valor total do custo. |
 	// --------------------------------------------------------------+
@@ -714,21 +714,21 @@ EndIf
 
 If nModulo == 28
 
-	oView:AddUserButton(STR0208,"",{|oView|At600OrcView()},,,{MODEL_OPERATION_VIEW} ) 							//'Vis. Orcçam. Serv.'
-	oView:AddUserButton(STR0194,"",{|oView|AT600COrc()},,,{MODEL_OPERATION_INSERT,MODEL_OPERATION_UPDATE} ) //'Atualiza Orc. Serviços'
-	oView:AddUserButton(STR0195,"",{|oView|At600SeExc()},,,{MODEL_OPERATION_INSERT,MODEL_OPERATION_UPDATE} ) //'Remover Orc. Serviços'
-	//oView:AddUserButton(STR0176,"",{||TECA350(A600LdPROD( oModel ))},,, { MODEL_OPERATION_INSERT, MODEL_OPERATION_UPDATE } ) //"Beneficios"	
-	//oView:AddUserButton(STR0280,"",{|oView|TECA340(oView,oMdlPROD,oMdlACES,aConfigAlo)},,,{MODEL_OPERATION_INSERT,MODEL_OPERATION_UPDATE} ) //'Conf. de Alocação'
-	
-	If !lPyme  		
+	oView:AddUserButton(STR0208,"",{|oView|At600OrcView()},,,{MODEL_OPERATION_VIEW} ) 							//'Vis. Orcï¿½am. Serv.'
+	oView:AddUserButton(STR0194,"",{|oView|AT600COrc()},,,{MODEL_OPERATION_INSERT,MODEL_OPERATION_UPDATE} ) //'Atualiza Orc. Serviï¿½os'
+	oView:AddUserButton(STR0195,"",{|oView|At600SeExc()},,,{MODEL_OPERATION_INSERT,MODEL_OPERATION_UPDATE} ) //'Remover Orc. Serviï¿½os'
+	//oView:AddUserButton(STR0176,"",{||TECA350(A600LdPROD( oModel ))},,, { MODEL_OPERATION_INSERT, MODEL_OPERATION_UPDATE } ) //"Beneficios"
+	//oView:AddUserButton(STR0280,"",{|oView|TECA340(oView,oMdlPROD,oMdlACES,aConfigAlo)},,,{MODEL_OPERATION_INSERT,MODEL_OPERATION_UPDATE} ) //'Conf. de Alocaï¿½ï¿½o'
+
+	If !lPyme
 		If	!( IsInCallStack("At270VProp") )
-			// Se a execução da VIEW não for a partir da rotina de Visualização da Vistoria Técnica, exibe os botões da Vistoria Técnica
+			// Se a execuï¿½ï¿½o da VIEW nï¿½o for a partir da rotina de Visualizaï¿½ï¿½o da Vistoria Tï¿½cnica, exibe os botï¿½es da Vistoria Tï¿½cnica
 			If !lMultVist .And. !lOrcSimp
 				oView:AddUserButton(STR0145,"",{|| A600VsVist(/*cCodVis*/,oModel)})	//"Visualizar Vistoria"
 				oView:AddUserButton(STR0144,"",{|| TECA280(/*cCodVis*/,oModel)},,,{ MODEL_OPERATION_INSERT, MODEL_OPERATION_UPDATE }) 		//"Vis.Tec x Proposta"
 				oView:AddUserButton(STR0146,"",{|| A600ImpVis(/*cCodVis*/,oModel)},,,{ MODEL_OPERATION_INSERT, MODEL_OPERATION_UPDATE }) 					//"Importar Vistoria Tecnica"
 			ElseIf !lOrcSimp
-				oView:AddUserButton(STR0147,"",{|| A600ConVis(oModel)}) 					//"Vistoria(s) Técnica"
+				oView:AddUserButton(STR0147,"",{|| A600ConVis(oModel)}) 					//"Vistoria(s) Tï¿½cnica"
 			EndIf
 		EndIf
 	EndIf
@@ -741,13 +741,13 @@ If lFT600APRV
 		lAprova := .F.
 	Endif
 EndIf
-	
+
 If ( SCJ->CJ_STATUS == 'F' .Or. lAprova ).And. lGeraOrc
    	oView:AddUserButton( STR0015, '', { |oView| Ft600Aprv( .T., oView ) },,,{ MODEL_OPERATION_VIEW } ) //"Aprovar"
     oView:AddUserButton( STR0046, '', { |oView| Ft600Aprv( .F., oView ) },,,{ MODEL_OPERATION_VIEW } ) //"Reprovar"
 Endif
 
-oView := CRMXAddAct("ADY",oView) //Adcionar Rotinas no 'Ações relacionadas' do Formulário
+oView := CRMXAddAct("ADY",oView) //Adcionar Rotinas no 'Aï¿½ï¿½es relacionadas' do Formulï¿½rio
 
 If ( lFT600BUT )
 	aButtons := ExecBlock( "FT600BUT", .F.,.F., {oView} )
@@ -762,13 +762,13 @@ oView:AddField('FORM1' , oStrADY,'ADYMASTER' )
 oView:AddGrid('Produt' , oStrADZPro,'ADZPRODUTO' )
 oView:AddGrid('Acess' , oStrADZAce,'ADZACESSOR' )
 oView:AddGrid('CROFIN' , oStructFke,'CRONOFIN' )
-If nModulo == 88 //Gestão de Transporte de Passageiros	
+If nModulo == 88 //Gestï¿½o de Transporte de Passageiros
 	// Campo Valor Total apenas Visivel
 	oStrGIOVE:SetProperty ( 'GIO_VALTOT', MVC_VIEW_CANCHANGE, .F. )
 	// Adiciona o componente para estrutura
 	oView:AddGrid('ViagEs' , oStrGINVE,'GINVIAESP' )
 	oView:AddGrid('Custos' , oStrGIOVE,'GIOCUSTOS' )
-	oView:AddGrid('Veicul' , oStrGIPVE,'GIPVEICULO')	
+	oView:AddGrid('Veicul' , oStrGIPVE,'GIPVEICULO')
 EndIf
 
 oView:AddField('FORM9', oStr4,'CALC')
@@ -813,14 +813,14 @@ oStrADZPro:RemoveField("R_E_C_N_O_")
 oView:CreateHorizontalBox( 'BOXFORM1', 50)
 oView:CreateHorizontalBox( 'MIDDLE', 34)
 
-oView:CreateFolder('ABAS','MIDDLE')  // Pasta que conterá cada uma das guias
+oView:CreateFolder('ABAS','MIDDLE')  // Pasta que conterï¿½ cada uma das guias
 oView:AddSheet( 'ABAS', 'ABA01', STR0236 )	//'Produto'
 oView:AddSheet( 'ABAS', 'ABA02', STR0237 )	//'Acessorio'
 oView:AddSheet( 'ABAS', 'ABA03', STR0238 )	//'Cronograma Financeiro'
-If nModulo == 88 //Gestão de Transporte de Passageiros
-	oView:AddSheet( 'ABAS', 'ABA04', STR0306 ) //  "Percurso"	
-	oView:AddSheet( 'ABAS', 'ABA05', STR0294 ) // "Custos"	
-	oView:AddSheet( 'ABAS', 'ABA06', STR0295 ) // "Veículos"		
+If nModulo == 88 //Gestï¿½o de Transporte de Passageiros
+	oView:AddSheet( 'ABAS', 'ABA04', STR0306 ) //  "Percurso"
+	oView:AddSheet( 'ABAS', 'ABA05', STR0294 ) // "Custos"
+	oView:AddSheet( 'ABAS', 'ABA06', STR0295 ) // "Veï¿½culos"
 EndIf
 oView:CreateHorizontalBox( 'BOXFORM11', 100, /*owner*/, /*lUsePixel*/, 'ABAS', 'ABA03')
 oView:SetOwnerView('CROFIN','BOXFORM11')
@@ -828,10 +828,10 @@ oView:SetOwnerView('CROFIN','BOXFORM11')
 oView:CreateHorizontalBox( 'ID_ABA01' , 100,,, 'ABAS', 'ABA01' )
 
 oView:CreateHorizontalBox( 'ID_ABA02' , 100,,, 'ABAS', 'ABA02' )
-If nModulo == 88 //Gestão de Transporte de Passageiros
+If nModulo == 88 //Gestï¿½o de Transporte de Passageiros
 	oView:CreateHorizontalBox( 'ID_ABA04' , 100,,, 'ABAS', 'ABA04' )
 	oView:CreateHorizontalBox( 'ID_ABA05' , 100,,, 'ABAS', 'ABA05' )
-	oView:CreateHorizontalBox( 'ID_ABA06' , 100,,, 'ABAS', 'ABA06' )	
+	oView:CreateHorizontalBox( 'ID_ABA06' , 100,,, 'ABAS', 'ABA06' )
 EndIf
 oView:CreateHorizontalBox( 'BOXFORM9', 16)
 oView:SetOwnerView('FORM9','BOXFORM9')
@@ -841,19 +841,19 @@ oView:SetOwnerView('FORM1','BOXFORM1')
 oView:SetOwnerView( 'Produt' , 'ID_ABA01')
 
 oView:SetOwnerView( 'Acess' , 'ID_ABA02')
-If nModulo == 88 //Gestão de Transporte de Passageiros
+If nModulo == 88 //Gestï¿½o de Transporte de Passageiros
 	oView:SetOwnerView( 'ViagEs' , 'ID_ABA04')
 	oView:SetOwnerView( 'Custos' , 'ID_ABA05')
-	oView:SetOwnerView( 'Veicul' , 'ID_ABA06')	
+	oView:SetOwnerView( 'Veicul' , 'ID_ABA06')
 EndIf
 
 oView:AddIncrementField('Acess' , 'ADZ_ITEM' )
 
 oView:AddIncrementField('Produt' , 'ADZ_ITEM' )
-If nModulo == 88 //Gestão de Transporte de Passageiros
-	oView:AddIncrementField('ViagEs' , 'GIN_ITEM' ) 
+If nModulo == 88 //Gestï¿½o de Transporte de Passageiros
+	oView:AddIncrementField('ViagEs' , 'GIN_ITEM' )
 	oView:AddIncrementField('Custos' , 'GIO_ITEM' )
-	oView:AddIncrementField('Veicul' , 'GIP_ITEM' ) 	
+	oView:AddIncrementField('Veicul' , 'GIP_ITEM' )
 EndIf
 
 //Refaz cronograma financeiro ao trocar de Aba
@@ -861,12 +861,12 @@ oView:SetVldFolder({|| Ft600Folcg()})
 
 oView:ShowInsertMessage(.F.)
 oView:ShowUpdateMessage(.F.)
-oView:SetCloseOnOk({|| .T.})	//Realizar o fechamento da Proposta após as confirmação
+oView:SetCloseOnOk({|| .T.})	//Realizar o fechamento da Proposta apï¿½s as confirmaï¿½ï¿½o
 Return oView
 
 //-------------------------------------------------------------------
 /*/{Protheus.doc} At600Tipo9
-Cria a Tela para preenchimento das parcelas 
+Cria a Tela para preenchimento das parcelas
 
 @author luiz.jesus
 
@@ -884,7 +884,7 @@ Local nNAnt		:= N						//Salva o N
 Local nOpAux		:= oModel:GetOperation()
 Local nOpetarion	:= Iif((nOpAux==3).OR.(nOpAux==4),3,1)
 Local cUsado		:= str2bin("x       x     x x       x       x       x       x       x       x       x       x       x       x       x       x  x    ")
-Local lAlterCron	:= SuperGetMv("MV_ALTERCR",,.F.)	// Parametro que define se a condição de pagamento parte do ADZ_DT1VEN
+Local lAlterCron	:= SuperGetMv("MV_ALTERCR",,.F.)	// Parametro que define se a condiï¿½ï¿½o de pagamento parte do ADZ_DT1VEN
 
 //Objetos da Tela
 Local oDlgModal	:= Nil
@@ -914,9 +914,9 @@ Private lRefresh
 Private aHeader	:= {}
 Private aCols		:= {}
 
-//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//³ Monta cabecalho                   ³
-//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿
+//ï¿½ Monta cabecalho                   ï¿½
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 AADD(aHeader,{STR0270,;								//01 - X3TITULO()            //"Parcela"
               "TEMP_ITEM",;							//02 - X3_CAMPO
               "@E 999",;								//03 - X3_PICTURE
@@ -949,7 +949,7 @@ AADD(aHeader,{STR0274,;								//01 - X3TITULO()		//"Percentual"
               "N",;									//08 - X3_TIPO
               "",;									//09 - X3_ARQUIVO
               ""})									//10 - X3_CONTEXT
-				
+
 AADD(aHeader,{STR0275,;								//01 - X3TITULO()		//"Data"
               "L4_DATA",;							//02 - X3_CAMPO
               "",;									//03 - X3_PICTURE
@@ -963,9 +963,9 @@ AADD(aHeader,{STR0275,;								//01 - X3TITULO()		//"Data"
 
 aTipo9 := Ft600GetTipo09()
 
-//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//³Se as parcelas devem ser recalculadas  ³ 
-//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿
+//ï¿½Se as parcelas devem ser recalculadas  ï¿½
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 If	Len(aTipo9) > 0
 	For nP := 1 To Len(aTipo9)
 		If	Alltrim(aTipo9[nP,5]) == Alltrim( oModel:GetModel(cFolder):GetValue('ADZ_ITEM') ) .And.;
@@ -980,9 +980,9 @@ If	Len(aTipo9) > 0
 Endif
 
 If	Len(aCols) == 0
-	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-	//³ Monta o Array com 1 elemento vazio³
-	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿
+	//ï¿½ Monta o Array com 1 elemento vazioï¿½
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	aCols			:= Array(1, Len(aHeader) + 1)
 	aCols[1][1]	:= StrZero(1,3)
 	aCols[1][2]	:= 0
@@ -993,7 +993,7 @@ EndIf
 
 n	:= Len(aCols)
 
-//Se executado via área de trabalho
+//Se executado via ï¿½rea de trabalho
 If Empty(aRotina)
 	aRotina := Menudef()
 EndIf
@@ -1033,14 +1033,14 @@ oLayMain:AddWindow("COL_CALC",   "WIN_CALC",   STR0272, 100, .F., .F.,, "LINE_CA
 oDlgLayCab		:= oLayMain:GetWinPanel("COL_CABEC", "WIN_CABEC", "LINE_CABEC")
 @ 04,02 SAY STR0407 SIZE 25,10 PIXEL OF oDlgLayCab  //"Produto"
 @ 02,35 MSGET oGetProd  VAR cProd  SIZE 105,10 WHEN .F. PICTURE "@!" PIXEL OF oDlgLayCab
-@ 18,02 SAY STR0408 SIZE 25,10 PIXEL OF oDlgLayCab  //"Descrição"
+@ 18,02 SAY STR0408 SIZE 25,10 PIXEL OF oDlgLayCab  //"Descriï¿½ï¿½o"
 @ 16,35 MSGET oGetDProd VAR cDProd SIZE 200,10 WHEN .F. PICTURE "@!" PIXEL OF oDlgLayCab
 
 oDlgLayParc				:= oLayMain:GetWinPanel("COL_PARCEL", "WIN_PARCEL", "LINE_PARCEL")
 oGetParc					:= MSGetDados():New(1,1,105,237,nOpetarion,Nil,"AlwaysTrue","+TEMP_ITEM",.T.,,,.F.,999,"At600Tp9FOk",,,,oDlgLayParc)
 oGetParc:oBrowse:bDelete	:= {|| aCols[n,Len(aCols[n])]	:= !aCols[n,Len(aCols[n])], At600Tp9Rf(), oGetParc:oBrowse:Refresh(.F.)}
 oGetParc:Refresh(.T.)
-	
+
 oDlgLayCalc	:= oLayMain:GetWinPanel( "COL_CALC", "WIN_CALC", "LINE_CALC" )
 @ 05,05 SAY STR0392 SIZE 20,10 PIXEL OF oDlgLayCalc  //Saldo:
 @ 03,25 MSGET oGetSaldo VAR nSaldo SIZE 54,10 WHEN .F. PICTURE "@E 999,999,999.99" PIXEL  OF oDlgLayCalc
@@ -1063,7 +1063,7 @@ Return(nOpcA == 1)
 /*/{Protheus.doc} At600Tp9GP
 @description	Funcao Gera Parcelas da tela em At600Tipo9.
 @sample		At600Tp9GP()
-@author		CRM e Serviços
+@author		CRM e Serviï¿½os
 @since		11/07/2017
 @version	P12
 /*/
@@ -1099,13 +1099,13 @@ Local nColDel			:= Len(aHeader) +1 //coluna de delecao
 // valida Saldo
 //-------------------------------------------------------------------
 If nSaldo <= 0
-	Help(,1,"A600TP9GP",,STR0400,1) //"Não há saldo para parcelar"
+	Help(,1,"A600TP9GP",,STR0400,1) //"Nï¿½o hï¿½ saldo para parcelar"
 	Return
 EndIf
 
 //-------------------------------------------------------------------
-// Monta o janela pesquisa. 
-//-------------------------------------------------------------------	
+// Monta o janela pesquisa.
+//-------------------------------------------------------------------
 oDialog := FWDialogModal():New()
 oDialog:SetTitle( STR0401 )    //"Gerar Parcelas"
 oDialog:SetBackGround( .F. )
@@ -1117,30 +1117,30 @@ oDialog:CreateDialog()
 oDialog:CreateFormBar()
 oDialog:AddButton( STR0065, bConfirmar, STR0065 , , .T., .F., .T., )			//"OK"
 oDialog:AddButton( STR0066,{|| oDialog:DeActivate()  },STR0066,,.T.,.F.,.T.)	//"Cancelar"
-	
+
 //-------------------------------------------------------------------
-// Recupera o container.  
-//-------------------------------------------------------------------	
+// Recupera o container.
+//-------------------------------------------------------------------
 oPanel := oDialog:GetPanelMain()
 
 //-------------------------------------------------------------------
-// Insere as opções de tela.  
-//-------------------------------------------------------------------	
+// Insere as opï¿½ï¿½es de tela.
+//-------------------------------------------------------------------
 @ 15,05 SAY STR0402  SIZE 70,10 PIXEL	OF oPanel  //"Quantidade de Parcelas:"
 @ 25,05 MSGET cQtdParc  SIZE 60,10 PICTURE "@999999" PIXEL HASBUTTON OF oPanel
 @ 15,85 SAY STR0403  SIZE 70,10 PIXEL OF oPanel  //"Primeiro Vencimento:"
 @ 25,85 MSGET dVenc  SIZE 60,10 PIXEL HASBUTTON OF oPanel
-	
+
 //-------------------------------------------------------------------
-// Exibe a janela.  
-//-------------------------------------------------------------------	
+// Exibe a janela.
+//-------------------------------------------------------------------
 oDialog:Activate()
 
 If lContinua
 
 	nQtdParc		:= Val(cQtdParc)
 	nVlrParcela	:= NoRound( nSaldo / nQtdParc , 2)
-					
+
 	nDiaVenc		:= Day(dVenc)
 	nMesVenc		:= Month(dVenc)
 	nAnoVenc		:= Year(dVenc)
@@ -1160,21 +1160,21 @@ If lContinua
 	Next nI
 
 	//-------------------------------------------------------------------
-	// Geracao das parcelas  
+	// Geracao das parcelas
 	//-------------------------------------------------------------------
 	nQtdParc += nParcMan := Len(aCols)
 	For nI := 1 to nQtdParc
 
 		//-------------------------------------------------------------------
-		// Nao altera parcelas inseridas manualmente  
+		// Nao altera parcelas inseridas manualmente
 		//-------------------------------------------------------------------
 		If nParcMan >= nI
 			aCols[nI][nColItm] := StrZero(nI,3)
 			Loop
 		EndIf
-			
+
 		//-------------------------------------------------------------------
-		// Nao incrementa data na primeira parcela automatica  
+		// Nao incrementa data na primeira parcela automatica
 		//-------------------------------------------------------------------
 		If nI > (1 + nParcMan)
 			If nMesVenc == 12
@@ -1186,7 +1186,7 @@ If lContinua
 		EndIf
 
 		//-------------------------------------------------------------------
-		// Calcula diferenca para a ultima parcela  
+		// Calcula diferenca para a ultima parcela
 		//-------------------------------------------------------------------
 		If nI == nQtdParc
 			nTtParcelado := 0
@@ -1198,9 +1198,9 @@ If lContinua
 
 			nVlrParcela := nTotal - nTtParcelado
 		EndIf
-		
+
 		//-------------------------------------------------------------------
-		// Grava parcela  
+		// Grava parcela
 		//-------------------------------------------------------------------
 		ASize(aCols,nI)
 		aCols[nI] := Array(5)
@@ -1213,7 +1213,7 @@ If lContinua
 	Next nI
 
 	//-------------------------------------------------------------------
-	// Atualiza Saldo na tela  
+	// Atualiza Saldo na tela
 	//-------------------------------------------------------------------
 	nTtParcelado := 0
 	For nX := 1 to len(aCols)
@@ -1227,16 +1227,16 @@ If lContinua
 
 	nSalPer := ( nSaldo / nTotal) * 100
 	oGetSalPer:Refresh()
-		
+
 EndIf
 
 Return
-                               
+
 //------------------------------------------------------------------------------
 /*/{Protheus.doc} At600Tp9LP
 Funcao Limpa Parcelas da tela em At600Tipo9.
 @sample		At600Tp9LP()
-@author		CRM e Serviços
+@author		CRM e Serviï¿½os
 @since		11/07/2017
 @version	P12
 /*/
@@ -1250,7 +1250,7 @@ Local nColData	:= aScan(aHeader,{|x|Alltrim(x[2])=="L4_DATA" }) //coluna de valo
 Local nColDel		:= Len(aHeader) +1 //coluna de delecao
 
 //-------------------------------------------------------------------
-// Limpa objeto da GetDados 
+// Limpa objeto da GetDados
 //-------------------------------------------------------------------
 aCols					:= {}
 aCols					:= Array(1, Len(aHeader) + 1)
@@ -1261,7 +1261,7 @@ aCols[1][nColData]	:= dDatabase
 aCols[1][nColDel]		:= .F.			//Linha de controle de DELECAO
 
 //-------------------------------------------------------------------
-// Atualiza Saldo na tela  
+// Atualiza Saldo na tela
 //-------------------------------------------------------------------
 nSaldo := nTotal
 oGetSaldo:Refresh()
@@ -1274,7 +1274,7 @@ Return
 /*/{Protheus.doc} At600Tp9Rf
 Funcao Refresh dos objetos de tela em At600Tipo9.
 @sample		At600Tp9Rf()
-@author		CRM e Serviços
+@author		CRM e Serviï¿½os
 @since		11/07/2017
 @version	P12
 /*/
@@ -1300,7 +1300,7 @@ For nI := 1 to len(aColsParc)
 Next nI
 
 //-------------------------------------------------------------------
-// Atualiza Saldo na tela  
+// Atualiza Saldo na tela
 //-------------------------------------------------------------------
 nSaldo := nTotal - nSomaItens
 oGetSaldo:Refresh()
@@ -1313,7 +1313,7 @@ Return
 /*/{Protheus.doc} At600Tp9FOk
 Funcao field ok do getDados em At600Tipo9.
 @sample		At600Tp9FOk()
-@author		CRM e Serviços
+@author		CRM e Serviï¿½os
 @since		11/07/2017
 @version	P12
 /*/
@@ -1352,7 +1352,7 @@ For nI:=1 to len(aCols)
 Next nI
 
 //-------------------------------------------------------------------
-// Atualiza Saldo na tela  
+// Atualiza Saldo na tela
 //-------------------------------------------------------------------
 nSaldo := nTotal - nSomaItens
 oGetSaldo:Refresh()
@@ -1360,15 +1360,15 @@ oGetSaldo:Refresh()
 nSalPer := ( nSaldo / nTotal) * 100
 oGetSalPer:Refresh()
 Return .T.
-                               
+
 //------------------------------------------------------------------------------
 /*/{Protheus.doc} A600CompPr
 
-Função que faz a comparação das propostas.
+Funï¿½ï¿½o que faz a comparaï¿½ï¿½o das propostas.
 
 @sample		A600CompPr()
 
-@author		CRM e Serviços
+@author		CRM e Serviï¿½os
 @since		29/04/2013
 @version	P12
 /*/
@@ -1408,9 +1408,9 @@ If Len(aListBox) > 0
 
 	DEFINE FONT oBold NAME "Arial" SIZE 0, -12 BOLD
 	DEFINE MSDIALOG  oDlgProp Title STR0128 From 0, 0 To 255, 450 Pixel
-	oDlgProp:cToolTip := STR0244 //"Tela para Seleção de Propostas"
-	oDlgProp:cTitle := STR0245	//"Selecione as Propostas Comerciais para comparação"
-	@ 10, 10 Listbox oLbx Var cVar Fields Header ' ', STR0246, STR0247 Size 210, 095 Of oDlg Pixel //"Proposta"	"Data de Emissão"
+	oDlgProp:cToolTip := STR0244 //"Tela para Seleï¿½ï¿½o de Propostas"
+	oDlgProp:cTitle := STR0245	//"Selecione as Propostas Comerciais para comparaï¿½ï¿½o"
+	@ 10, 10 Listbox oLbx Var cVar Fields Header ' ', STR0246, STR0247 Size 210, 095 Of oDlg Pixel //"Proposta"	"Data de Emissï¿½o"
 	oLbx:SetArray(aListBox)
 	oLbx:bLine := {|| {IIf( aListBox[oLbx:nAt, 1], oOk, oNo ),;
 	                   aListBox[oLbx:nAt, 2], ;
@@ -1420,13 +1420,13 @@ If Len(aListBox) > 0
 	oLbx:lHScroll   := .F. // NoScroll
 	@ 112, 10 CheckBox oChkMar Var  lChk Prompt STR0248 Message STR0249 Size 40, 007 Pixel Of oDlgProp; //'Todos'###'Marca / Desmarca Todos'
 	                                     on Click Ft600Marca(lChk, @aListBox, oLbx)
-	DEFINE SButton From 111, 155 Type 1 Action ( IIf(FT600RetProp(@aRet, aListBox),(Ft600CR("ADY",aListBox[oLbx:nAt,2],aRet),oDlgProp:End()), MsgStop(STR0253)) ) OnStop STR0250 Enable Of oDlgProp //'Confirma a Seleção' "Não há Propostas Marcadas."
-	DEFINE SButton From 111, 188 Type 2 Action ( IIf(lTeveMarc, aRet := aMarcadas, .T.), oDlgProp:End() )                                                         OnStop STR0251 Enable Of oDlgProp //'Abandona a Seleção'
+	DEFINE SButton From 111, 155 Type 1 Action ( IIf(FT600RetProp(@aRet, aListBox),(Ft600CR("ADY",aListBox[oLbx:nAt,2],aRet),oDlgProp:End()), MsgStop(STR0253)) ) OnStop STR0250 Enable Of oDlgProp //'Confirma a Seleï¿½ï¿½o' "Nï¿½o hï¿½ Propostas Marcadas."
+	DEFINE SButton From 111, 188 Type 2 Action ( IIf(lTeveMarc, aRet := aMarcadas, .T.), oDlgProp:End() )                                                         OnStop STR0251 Enable Of oDlgProp //'Abandona a Seleï¿½ï¿½o'
 	ACTIVATE MSDIALOG oDlgProp CENTERED
 
 Else
 	lRetorno := .F.
-	Aviso(STR0241,STR0242,{STR0243})	//"Atençao"##"Não há Propostas a serem comparadas!"##"Ok"
+	Aviso(STR0241,STR0242,{STR0243})	//"Atenï¿½ao"##"Nï¿½o hï¿½ Propostas a serem comparadas!"##"Ok"
 EndIf
 
 RestArea(aAreaADY)
@@ -1438,13 +1438,13 @@ Return(lRetorno)
 
 Programa de comparacao das revisoes da Proposta Comercial.
 
-@sample  Ft600CR(cCodVSup) 
+@sample  Ft600CR(cCodVSup)
 
 @Param   cCodVSup - Codigo do supervisor
 
-@return  lAchou -  Variavel lógica com flag informando se achou ou não
+@return  lAchou -  Variavel lï¿½gica com flag informando se achou ou nï¿½o
 
-@author  Serviços/CRM
+@author  Serviï¿½os/CRM
 @since   29/04/2014
 @version P12
 /*/
@@ -1481,13 +1481,13 @@ EndIf
 lRet := Ft600Rev((cAlias)->ADY_PROPOS, @aLstHeader, @aLstCols, @cLine,(cAlias)->ADY_OPORTU,aPropos)
 
 If Len(aLstCols) > 1
-	
-	DEFINE DIALOG oDlg TITLE STR0063 FROM 0,-300 TO 470,600 OF oMainWnd PIXEL //"Comparador das revisões"
+
+	DEFINE DIALOG oDlg TITLE STR0063 FROM 0,-300 TO 470,600 OF oMainWnd PIXEL //"Comparador das revisï¿½es"
 
 	DEFINE FONT oBold 	NAME "Arial"   		SIZE 0, -13 BOLD
 	DEFINE FONT oFont1	NAME "Courier New" 	SIZE 7,15
 	@  0, 0  BITMAP oBmp RESNAME "PROJETOAP" oF oDlg SIZE 30, 1000 NOBORDER WHEN .F. PIXEL ADJUST
-	@ 03, 40 SAY STR0064 FONT oBold PIXEL //"Selecione as revisões que deseja comparar"
+	@ 03, 40 SAY STR0064 FONT oBold PIXEL //"Selecione as revisï¿½es que deseja comparar"
 	@ 14, 30 TO 16 ,450 LABEL '' OF oDlg   PIXEL
 	@ 40, 30 LISTBOX oList VAR cVar Fields SIZE 420, 170 ON DBLCLICK (Ft600Click(@aLstCols,oList:nAt)) OF oDlg PIXEL FONT oFont1
 	oList:aHeaders := aLstHeader
@@ -1497,14 +1497,14 @@ If Len(aLstCols) > 1
 	@ 22 , 412 BUTTON STR0023  SIZE 039, 013 OF oDlg PIXEL Action(Ft600Vis(aLstCols,oList:nAt))//"Visualizar"
 	@ 218, 369 BUTTON STR0065  SIZE 039, 013 OF oDlg PIXEL Action(iIf(Ft600ROk(aLstCols,@aCmp),(nOpca := 1,oDlg:End()),)) //"OK"
 	@ 218, 412 BUTTON STR0066  SIZE 039, 013 OF oDlg PIXEL Action( nOpca := 0, oDlg:End()) //"Cancelar"
-   
+
 	ACTIVATE MSDIALOG oDlg CENTERED
 
 	If nOpca == 1
-		Processa({||Ft600Cmp(aCmp)}, STR0067, STR0068,.F.)	//"Processando"###"Comparando as revisões da Proposta comercial..."
+		Processa({||Ft600Cmp(aCmp)}, STR0067, STR0068,.F.)	//"Processando"###"Comparando as revisï¿½es da Proposta comercial..."
 	EndIf
 Else
-	Aviso(STR0069,STR0070,{STR0065})	//Proposta selecionada não possui revisões!
+	Aviso(STR0069,STR0070,{STR0065})	//Proposta selecionada nï¿½o possui revisï¿½es!
 	lRet := .F.
 EndIf
 
@@ -1517,7 +1517,7 @@ Programa de comparacao das revisoes da Proposta Comercial.
 
 @sample  Ft600Cmp
 
-@author  Serviços/CRM
+@author  Serviï¿½os/CRM
 @since   29/04/2014
 @version P12
 /*/
@@ -1566,34 +1566,34 @@ aOpVComp:= Ft600Compara(aOrigem,aDestino)
 
 //Monta a  tela com o tree da versao base e com o tree da versao
 //resultado da comparacao.
-aAdd( aObjects, { 100, 100, .T., .T., .F. } )  
-aAdd( aObjects, { 100, 100, .T., .T., .F. } )  
-aInfo  := { aSize[1],aSize[2],aSize[3],aSize[4],3,3 } 
-aPosObj:= MsObjSize( aInfo, aObjects, .T.,.T. )  
+aAdd( aObjects, { 100, 100, .T., .T., .F. } )
+aAdd( aObjects, { 100, 100, .T., .T., .F. } )
+aInfo  := { aSize[1],aSize[2],aSize[3],aSize[4],3,3 }
+aPosObj:= MsObjSize( aInfo, aObjects, .T.,.T. )
 
-DEFINE MSDIALOG oDlg TITLE STR0254 FROM aSize[7],0 TO aSize[6],aSize[5] OF oMainWnd PIXEL	//"Comparação das Revisões"
+DEFINE MSDIALOG oDlg TITLE STR0254 FROM aSize[7],0 TO aSize[6],aSize[5] OF oMainWnd PIXEL	//"Comparaï¿½ï¿½o das Revisï¿½es"
 
 	MENU oMenu POPUP
 		MENUITEM STR0023 ACTION Ft600VisDet(@oTree,aOrigem)	//"Visualizar"
 	ENDMENU
 
-	MENU oMenu2 POPUP 
+	MENU oMenu2 POPUP
 		MENUITEM STR0023 ACTION Ft600VisDet(@oTree2,aOpVComp)	//"Visualizar"
 		MENUITEM STR0255 ACTION Ft600Item(oTree,oTree2,aOrigem,aOpVComp,aCmp[1],aCmp[2])	//"Comparar"
 	ENDMENU
 
 	oTree:= dbTree():New(aPosObj[1,1], aPosObj[1,2],aPosObj[1,3],aPosObj[1,4], oDlg,,,.T.)
-	oTree:bRClicked := {|o,x,y|  oMenu:Activate(x-100,y-200,oTree) } // Posição x,y em relação a Dialog 
+	oTree:bRClicked := {|o,x,y|  oMenu:Activate(x-100,y-200,oTree) } // Posiï¿½ï¿½o x,y em relaï¿½ï¿½o a Dialog
 	oTree:bChange   := {|| Ft600CtrMenu(1,oMenu,oTree)}
-	oTree:lShowHint := .F. 
+	oTree:lShowHint := .F.
 	Ft600MontaTree(@oTree,aOrigem)
-	
+
 	oTree2:= dbTree():New(aPosObj[2,1], aPosObj[2,2],aPosObj[2,3],aPosObj[2,4], oDlg,,,.T.)
-	oTree2:bRClicked := {|o,x,y|  oMenu2:Activate(x-800,y-200,oTree2) } // Posição x,y em relação a Dialog 
+	oTree2:bRClicked := {|o,x,y|  oMenu2:Activate(x-800,y-200,oTree2) } // Posiï¿½ï¿½o x,y em relaï¿½ï¿½o a Dialog
 	oTree2:bChange   := {|| Ft600CtrMenu(2,oMenu2,oTree2)}
-	oTree2:lShowHint := .F. 
+	oTree2:lShowHint := .F.
 	Ft600MontaTree(@oTree2,aOpVComp)
-	
+
 	AAdd(aButtons, {"DBG09",       {|| Ft600Inf()}, STR0256})	//"Legenda"
    	AAdd(aButtons, {"PMSSETADOWN", {|| Ft300Nav(1,aOpVComp,@oTree,@oTree2)}, STR0257, STR0257})	//"Proxima Diferenca"
    	AAdd(aButtons, {"PMSSETAUP",   {|| Ft300Nav(2,aOpVComp,@oTree,@oTree2)}, STR0258, STR0258})	//"Diferenca Anterior"
@@ -1609,9 +1609,9 @@ Interface de desbloqueio de proposta
 
 @sample     A600DesbP(  )
 
-@param		 ExpC - Codigo do Vendedor superior	
+@param		 ExpC - Codigo do Vendedor superior
 
-@return     ExpL: Verdadeiro 
+@return     ExpL: Verdadeiro
 
 @author     Victor Bitencourt
 @since      08/09/2014
@@ -1638,18 +1638,18 @@ Local aPropBlq := A600BProp(cCodVSup)
 Static oDlg 				//Objeto MSDialog Proposta(s) bloqueada(s)
 
 If Len(aPropBlq) > 0
-	
+
 	DEFINE MSDIALOG oDlg TITLE STR0088 FROM 000, 000  TO 340,900 PIXEL  //Proposta(s) Bloqueada(s)
-	
+
 	oPanel1 := TPanel():New(00,00,/*cText*/,oDlg,/*oFont*/,/*lCentered*/,;
 	                        /*uParam7*/,/*nClrText*/,/*nClrBack*/,;
 	                        350,497,/*lLowered*/,/*lRaised*/)
-	
+
 	oPanel2 := TPanel():New(00,00,/*cText*/,oDlg,/*oFont*/,/*lCentered*/,;
 	                        /*uParam7*/,/*nClrText*/,/*nClrBack*/,;
 	                        350,026,/*lLowered*/,/*lRaised*/)
-	
-	@ 001, 001 GROUP oGrpProp TO 143, 400 PROMPT STR0089 OF oPanel1 PIXEL  //"Proposta bloqueadas criadas pelos vendedores em sua célula de vendas"
+
+	@ 001, 001 GROUP oGrpProp TO 143, 400 PROMPT STR0089 OF oPanel1 PIXEL  //"Proposta bloqueadas criadas pelos vendedores em sua cï¿½lula de vendas"
 	@ 000, 001 GROUP oGrpPesq TO 024, 200 PROMPT STR0090 OF oPanel2 PIXEL //"Pesquisa"
 	@ 008, 004 MSGET oGet1 VAR cGet1 SIZE 093, 010 OF oPanel2 PIXEL
 	@ 008, 108 BUTTON oBtn1 PROMPT STR0091 SIZE 037, 012 OF oPanel2 PIXEL ACTION IIF(A600Pesq(oBrwPBlq,cGet1, .T. ),oGet1:SetColor(CLR_BLACK,CLR_WHITE),oGet1:SetColor(CLR_WHITE,CLR_HRED))//"&Pesquisar"
@@ -1660,15 +1660,15 @@ If Len(aPropBlq) > 0
 	@ 008, 358 BUTTON oBtn6 PROMPT STR0046 SIZE 037, 012 OF oPanel2 PIXEL ACTION IIF(A600Reprov(oBrwPBlq),IIF(A600RProp(oBrwPBlq,cCodVSup),oDlg:End(),Nil) ,Nil)//"Reprovar"
 	@ 008, 406 BUTTON oBtn7 PROMPT STR0097 SIZE 037, 012 OF oPanel2 PIXEL ACTION oDlg:End()//"Sair"
 	oBrwPBlq := FWBrwProp(oPanel1,aPropBlq)
-	
+
 	// Don't change the Align Order
 	oPanel1:Align := CONTROL_ALIGN_ALLCLIENT
 	oPanel2:Align := CONTROL_ALIGN_BOTTOM
-	
+
 	ACTIVATE MSDIALOG oDlg CENTERED
-	
+
 Else
-	AVISO(STR0096,STR0098,{STR0099},1)  //"Não há proposta(s) bloqueada(s) para aprovação"//"Fechar"
+	AVISO(STR0096,STR0098,{STR0099},1)  //"Nï¿½o hï¿½ proposta(s) bloqueada(s) para aprovaï¿½ï¿½o"//"Fechar"
 EndIf
 
 Return(.T.)
@@ -1676,14 +1676,14 @@ Return(.T.)
 //-----------------------------------------------------------------------------------------
 /*/{Protheus.doc} FwBrwProp
 
-Browse para marcacao da(s) proposta(s) bloqueada(s)  
+Browse para marcacao da(s) proposta(s) bloqueada(s)
 
 @sample     FwBrwProp(  )
 
 @param		 ExpO1 - Objeto oPanel1
-@param		 ExpA2 - Proposta(s) bloqueada(s)  
+@param		 ExpA2 - Proposta(s) bloqueada(s)
 
-@return     ExpL: Verdadeiro/Falso 
+@return     ExpL: Verdadeiro/Falso
 
 @author     Victor Bitencourt
 @since      08/09/2014
@@ -1698,9 +1698,9 @@ Local nRow 		:= 09  		   						  	//coordenada vertical.
 Local nCol      	:= 03 	   		   						//coordenada horizontal.
 Local nWidth    	:= 392			   						//largura em pixels do objeto.
 Local nHeight   	:= 130		  	    	 				//altura em pixels do objeto.
-Local aHeaders  	:={STR0100,STR0101,STR0102,STR0103}    //título dos campos no cabeçalho. ##"Proposta"#"Data"#"Entidade"#"Nome"##
+Local aHeaders  	:={STR0100,STR0101,STR0102,STR0103}    //tï¿½tulo dos campos no cabeï¿½alho. ##"Proposta"#"Data"#"Entidade"#"Nome"##
 Local aColSizes 	:={30,30,35,142}           				// largura das colunas.
-Local bLDblClick 	:= {|| }								//bloco de codigo que será executado quando clicar duas vezes no objeto.
+Local bLDblClick 	:= {|| }								//bloco de codigo que serï¿½ executado quando clicar duas vezes no objeto.
 Local uParam20 	:= .F.    								//Compatibilidade.
 Local lPixel    	:=.T.    							    //Considera as coordenadas passadas em pixels.
 Local uParam24  	:=.F.    							    //Compatibilidade.
@@ -1719,9 +1719,9 @@ aBrowse[oBrowse:nAt,3],;
 aBrowse[oBrowse:nAt,4];
 }}
 
-//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//³ Troca a imagem no duplo click do mouse.³
-//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿
+//ï¿½ Troca a imagem no duplo click do mouse.ï¿½
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 oBrowse:bLDblClick := {||VisualProp(aBrowse[oBrowse:nAt,5]),oBrowse:DrawSelect()}
 
 // Scroll type
@@ -1736,7 +1736,7 @@ Exibicao do time de vendas associado a oportunidade da proposta atual.
 
 @sample  A600TimeV
 
-@author  Serviços/CRM
+@author  Serviï¿½os/CRM
 @since   29/04/2014
 @version P12
 /*/
@@ -1752,12 +1752,12 @@ Local aVend		:= {}									// Lista de vendedores
 Local oMdlOpor	:= FT600MdlOport()
 Local oMdlAD1 		:= oMdlOpor:GetModel("AD1MASTER")
 Local cOportun		:= oMdlAD1:GetValue("AD1_NROPOR")
-Local cRevisa	 	:= oMdlAD1:GetValue("AD1_REVISA")	
+Local cRevisa	 	:= oMdlAD1:GetValue("AD1_REVISA")
 Local cFilAD2		:= xFilial("AD2")						// Filial da tabela AD2
 Local cFilSA3		:= xFilial("SA3")						// Filial da tabela SA3
 Local cFilSUM		:= xFilial("SUM")						// Filial da tabela SUM
 Local oDlg			:= Nil  								// Objeto da tela
-Local oLBox		:= Nil									// Objeto da Listbox 
+Local oLBox		:= Nil									// Objeto da Listbox
 
 Default cRevisa := ""
 
@@ -1769,7 +1769,7 @@ DbSelectArea("SUM")
 DbSetOrder(1)	//A3_FILIAL+A3_COD
 
 DbSelectArea("AD2")
-DbSetOrder(1)	//AD2_FILIAL+AD2_NROPOR+AD2_REVISA+AD2_VEND   
+DbSetOrder(1)	//AD2_FILIAL+AD2_NROPOR+AD2_REVISA+AD2_VEND
 DbSeek(cFilAD2+cOportun+cRevisa)
 
 	//Percorre o time de vendas da oportunidade associada
@@ -1777,44 +1777,44 @@ DbSeek(cFilAD2+cOportun+cRevisa)
 		AD2->AD2_FILIAL	== cFilAD2	.AND.;
 		AD2->AD2_NROPOR	== cOportun	.AND.;
 		AD2->AD2_REVISA	== cRevisa
-		
+
 		SA3->(DbSeek(cFilSA3+AD2->AD2_VEND))	//Posiciona Vendedor
 		SUM->(DbSeek(cFilSUM+SA3->A3_CARGO))	//Localiza o cargo do vendedor
-			
-	
+
+
 		//Armazena os dados
 		AAdd(aVend,{AD2->AD2_VEND,AllTrim(Capital(SA3->A3_NOME)),AllTrim(Capital(SUM->UM_DESC))})
-		
-		AD2->(DbSkip())              
-		
+
+		AD2->(DbSkip())
+
 	End
 
 	//Se encontrou vendedores para a oportunidade, monta a tela
 	//com a listbox para exibicao do time
 	If Len(aVend) > 0
-	
+
 		DEFINE MSDIALOG oDlg TITLE STR0017 + " - " + STR0042 + cOportun FROM 0,0 TO 300,665 PIXEL  //"Time de vendas"###"Oportunidade:"
-		
+
 		//Label
-		@ 03,03 TO 145,295 LABEL STR0017 PIXEL OF oDlg   
-		
+		@ 03,03 TO 145,295 LABEL STR0017 PIXEL OF oDlg
+
 		//Listbox
 		@ 12,08 ListBox oLBox Fields HEADER STR0043,STR0044,STR0045;  //"Codigo"###"Nome"###"Cargo"
 		Size 280,126 Of oDlg Pixel
-		
+
 		//Atribuicao do conteudo da listbox
 		oLBox:SetArray(aVend)
 		oLBox:bLine := {||{	aVend[oLBox:nAt,01],;
 					 		aVend[oLBox:nAT,02],;
-							aVend[oLBox:nAT,03]}} 
-		
+							aVend[oLBox:nAT,03]}}
+
 		//Botoes
 		DEFINE SBUTTON FROM 005,300 TYPE 1 ENABLE OF oDlg Action (oDlg:End())
-		
-		ACTIVATE MSDIALOG oDlg CENTERED 
-	
+
+		ACTIVATE MSDIALOG oDlg CENTERED
+
 	Else
-		Help("",1,"FT600TIMVEN",,STR0041,1) //"Time de vendas não encontrado para a oportunidade desta proposta"
+		Help("",1,"FT600TIMVEN",,STR0041,1) //"Time de vendas nï¿½o encontrado para a oportunidade desta proposta"
 	EndIf
 
 RestArea(aAreaSA3)
@@ -1832,7 +1832,7 @@ a fim de possibilitar ao usuario o valor de desembolso financeiro.
 
 @sample  Ft600Impos
 
-@author  Serviços/CRM
+@author  Serviï¿½os/CRM
 @since   29/04/2014
 @version P12
 /*/
@@ -1854,7 +1854,7 @@ Local oDlg			:= NIL
 Local oFolder		:= NIL
 Local nZ         := 0
 Local aCols		 := {}
-Local oModel	 := FWModelActive() 
+Local oModel	 := FWModelActive()
 Local nOperation := oModel:GetOperation()
 Local oMdlADZ1    := oModel:GetModel("ADZPRODUTO")
 Local oStructADZ1 := oMdlADZ1:GetStruct()
@@ -1892,12 +1892,12 @@ MaFisIni(Iif(Empty(M->ADY_CLIENT),M->ADY_CODIGO,M->ADY_CLIENT),; 							// 1-Cod
          Nil,;
          Nil,;
          Nil,;
-         Nil,; 
-         "MATA461",; 							// 10-Nome da rotina que esta utilizando a funcao                          
-         Nil,;                          
-         Nil,;                         
-         If(SubsTr(M->ADY_ENTIDA,1,1)<> "1" .AND. Empty(M->ADY_CLIENT),M->ADY_CODIGO + M->ADY_LOJA,"")) // 13- Codigo e Loja do Prospect   
- 
+         Nil,;
+         "MATA461",; 							// 10-Nome da rotina que esta utilizando a funcao
+         Nil,;
+         Nil,;
+         If(SubsTr(M->ADY_ENTIDA,1,1)<> "1" .AND. Empty(M->ADY_CLIENT),M->ADY_CODIGO + M->ADY_LOJA,"")) // 13- Codigo e Loja do Prospect
+
 	//Na argentina o calculo de impostos depende da serie.
 	If cPaisLoc == 'ARG'
 		MaFisAlt('NF_SERIENF',LocXTipSer('SA1',MVNOTAFIS))
@@ -1912,8 +1912,8 @@ MaFisIni(Iif(Empty(M->ADY_CLIENT),M->ADY_CODIGO,M->ADY_CLIENT),; 							// 1-Cod
 			aCols := oMdlADZ1:ACOLS
 		Else
 			aCols := oMdlADZ2:ACOLS
-		EndIf 
-		
+		EndIf
+
 		For nX := 1 to Len(aCols)
 			//Verifica se a linha foi deletada
 			If ( !oMdlADZ1:IsDeleted() .And. !Empty(aCols[nX][nCodPro]))
@@ -1926,7 +1926,7 @@ MaFisIni(Iif(Empty(M->ADY_CLIENT),M->ADY_CODIGO,M->ADY_CLIENT),; 							// 1-Cod
 				SB2->(MsSeek(cFilSB2+aCols[nX][nCodPro]+SB1->B1_LOCPAD))
 				SF4->(dbSetOrder(1))
 				SF4->(MsSeek(cFilSF4+aCols[nX][nTes]))
-				
+
 				//Calcula o preco de lista
 				nValMerc  := aCols[nX][nValor]
 				nPrcLista := aCols[nX][nPrUnit]
@@ -1941,12 +1941,12 @@ MaFisIni(Iif(Empty(M->ADY_CLIENT),M->ADY_CODIGO,M->ADY_CLIENT),; 							// 1-Cod
 				nDesconto := IIf(nDesconto==0,aCols[nX][nValDes],nDesconto)
 				nDesconto := Max(0,nDesconto)
 				nPrcLista += nAcresFin
-				
+
 				//Para os outros paises, este tratamento e feito no programas que calculam os impostos.
-				If cPaisLoc=="BRA" .or. lDescSai   
+				If cPaisLoc=="BRA" .or. lDescSai
 					nValMerc  += nDesconto
 				Endif
-				
+
 				//Agrega os itens para a funcao fiscal
 				MaFisAdd((aCols[nX][nCodPro]),;   	// 1-Codigo do Produto ( Obrigatorio )
 				         (aCols[nX][nTes]),;	   			// 2-Codigo do TES ( Opcional )
@@ -1962,28 +1962,28 @@ MaFisIni(Iif(Empty(M->ADY_CLIENT),M->ADY_CODIGO,M->ADY_CLIENT),; 							// 1-Cod
 				         0,;				   					// 12-Valor do Frete Autonomo ( Opcional )
 				         nValMerc,;							// 13-Valor da Mercadoria ( Obrigatorio )
 				         0)				   					// 14-Valor da Embalagem ( Opiconal )
-				
+
 				SB1->(dbSetOrder(1))
 				If SB1->(MsSeek(cFilSB1+aCols[nX][nCodPro]))
 					nQtdPeso := aCols[nX][nQtdVen]*SB1->B1_PESO
 				Endif
-				
+
 				//Altera peso para calcular frete
 				MaFisAlt("IT_PESO",nQtdPeso,nItem)
 				MaFisAlt("IT_PRCUNI",nPrcLista,nItem)
 				MaFisAlt("IT_VALMERC",nValMerc,nItem)
-				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-				//³Tratamento efetuado para atender ao calculo  ³
-				//³do FCI.									    ³
-				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-				N := nX		//Incialização manual da variável N para verificar o aCols
+				//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿
+				//ï¿½Tratamento efetuado para atender ao calculo  ï¿½
+				//ï¿½do FCI.									    ï¿½
+				//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+				N := nX		//Incializaï¿½ï¿½o manual da variï¿½vel N para verificar o aCols
 				cF600Cla := CodSitTri()
-				MaFisAlt("IT_CLASFIS", cF600Cla,nX)				
+				MaFisAlt("IT_CLASFIS", cF600Cla,nX)
 			EndIf
 			dbSelectArea("ADZ")
 			dbSkip()
-		Next nX 
-	
+		Next nX
+
 	Next nY
 
 //Monta a tela de exibicao dos valores fiscais
@@ -2025,11 +2025,11 @@ Return
 
 //-----------------------------------------------------------------------------------------
 /*/{Protheus.doc} Ft600GetCrono
-@description	Devido ao fracionamento dos fontes, é necessário guardar o conteúdo da variável estática do
-             	Cronograma Financeiro para passar para os outros fontes que compõem o FATA600,
-             	evitando assim, a declaração de variáveis Private.
-@sample		Ft600Crono( ) 
-@return		aCronoFin: Array do Cronograma (Retorna a variável statica do cronograma financeiro.) 
+@description	Devido ao fracionamento dos fontes, ï¿½ necessï¿½rio guardar o conteï¿½do da variï¿½vel estï¿½tica do
+             	Cronograma Financeiro para passar para os outros fontes que compï¿½em o FATA600,
+             	evitando assim, a declaraï¿½ï¿½o de variï¿½veis Private.
+@sample		Ft600Crono( )
+@return		aCronoFin: Array do Cronograma (Retorna a variï¿½vel statica do cronograma financeiro.)
 @author		Thamara Villa Jacomo
 @since			09/01/2014
 @version		P12
@@ -2042,13 +2042,13 @@ Return( aCronoFin )
 //-----------------------------------------------------------------------------------------
 /*/{Protheus.doc} Ft600GetAloc
 
-Devido ao fracionamento dos fontes, é necessário guardar o conteúdo da variável estática do
-Cronograma Financeiro para passar para os outros fontes que compõem o FATA600,
-evitando assim, a declaração de variáveis Private.	 
+Devido ao fracionamento dos fontes, ï¿½ necessï¿½rio guardar o conteï¿½do da variï¿½vel estï¿½tica do
+Cronograma Financeiro para passar para os outros fontes que compï¿½em o FATA600,
+evitando assim, a declaraï¿½ï¿½o de variï¿½veis Private.
 
-@sample     Ft600GetAloc( ) 
+@sample     Ft600GetAloc( )
 
-@return     aConfigAlo: Configuracao da alocação
+@return     aConfigAlo: Configuracao da alocaï¿½ï¿½o
 
 @author     Thamara Villa Jacomo
 @since      09/01/2014
@@ -2061,9 +2061,9 @@ Return( aConfigAlo )
 
 //-----------------------------------------------------------------------------------------
 /*/{Protheus.doc} Ft600SetAloc
-Seta a configuração da alocação.
+Seta a configuraï¿½ï¿½o da alocaï¿½ï¿½o.
 @sample     Ft600SetAloc( aCfgAlo )
-@return     Nenhum 
+@return     Nenhum
 @author     Thamara Villa Jacomo
 @since      09/01/2014
 @version    P12
@@ -2079,13 +2079,13 @@ Return
 //-----------------------------------------------------------------------------------------
 /*/{Protheus.doc} FT600GetBen()
 
-Devido ao fracionamento dos fontes, é necessário guardar o conteúdo da variável estática do
-Beneficio para passar para os outros fontes que compõem o FATA600,
-evitando assim, a declaração de variáveis Private.	 
+Devido ao fracionamento dos fontes, ï¿½ necessï¿½rio guardar o conteï¿½do da variï¿½vel estï¿½tica do
+Beneficio para passar para os outros fontes que compï¿½em o FATA600,
+evitando assim, a declaraï¿½ï¿½o de variï¿½veis Private.
 
-@sample     FT600GetBen( ) 
+@sample     FT600GetBen( )
 
-@return     _aTFFCOD_: Array dos codigos do item do RH 
+@return     _aTFFCOD_: Array dos codigos do item do RH
 
 @author     totvs
 @since      01/06/2015
@@ -2103,13 +2103,13 @@ Return
 //-----------------------------------------------------------------------------------------
 /*/{Protheus.doc} FT600GetVis()
 
-Devido ao fracionamento dos fontes, é necessário guardar o conteúdo da variável estática do
-Beneficio para passar para os outros fontes que compõem o FATA600,
-evitando assim, a declaração de variáveis Private.	 
+Devido ao fracionamento dos fontes, ï¿½ necessï¿½rio guardar o conteï¿½do da variï¿½vel estï¿½tica do
+Beneficio para passar para os outros fontes que compï¿½em o FATA600,
+evitando assim, a declaraï¿½ï¿½o de variï¿½veis Private.
 
-@sample     FT600GetVis( ) 
+@sample     FT600GetVis( )
 
-@return     _lVistoria_: Logico 
+@return     _lVistoria_: Logico
 
 @author     totvs
 @since      08/06/2015
@@ -2123,13 +2123,13 @@ Return( _lVistoria_ )
 //-----------------------------------------------------------------------------------------
 /*/{Protheus.doc} FT600SetVis()
 
-Devido ao fracionamento dos fontes, é necessário guardar o conteúdo da variável estática do
-Beneficio para passar para os outros fontes que compõem o FATA600,
-evitando assim, a declaração de variáveis Private.	 
+Devido ao fracionamento dos fontes, ï¿½ necessï¿½rio guardar o conteï¿½do da variï¿½vel estï¿½tica do
+Beneficio para passar para os outros fontes que compï¿½em o FATA600,
+evitando assim, a declaraï¿½ï¿½o de variï¿½veis Private.
 
-@sample     FT600SetVis( ) 
+@sample     FT600SetVis( )
 
-@return    
+@return
 
 @author     totvs
 @since      08/06/2015
@@ -2143,12 +2143,12 @@ Return
 
 //-----------------------------------------------------------------------------------------
 /*/{Protheus.doc} Ft600GetTipo09
-Devido ao fracionamento dos fontes, é necessário guardar o conteúdo da variável estática do
-array aTipo09 para passar para os outros fontes que compõem o FATA600,
-evitando assim, a declaração de variáveis Private.	 
-@sample     Ft600GetTipo09( ) 
-@return	ExpA = Array com o conteúdo da variável aTipo09      
-@author     Thamara Villa 
+Devido ao fracionamento dos fontes, ï¿½ necessï¿½rio guardar o conteï¿½do da variï¿½vel estï¿½tica do
+array aTipo09 para passar para os outros fontes que compï¿½em o FATA600,
+evitando assim, a declaraï¿½ï¿½o de variï¿½veis Private.
+@sample     Ft600GetTipo09( )
+@return	ExpA = Array com o conteï¿½do da variï¿½vel aTipo09
+@author     Thamara Villa
 @since      13/01/2014
 @version    P12.1.7
 /*/
@@ -2159,13 +2159,13 @@ Return( aTipo09 )
 
 //-----------------------------------------------------------------------------------------
 /*/{Protheus.doc} Ft600SetTipo09
-Devido ao fracionamento dos fontes, é necessário guardar o conteúdo da variável estática do
-array aTipo09 para passar para os outros fontes que compõem o FATA600,
-evitando assim, a declaração de variáveis Private.	 
-@sample     Ft600SetTipo09( ) 
-@param 		ExpA = Array com o conteúdo da variável aTipo09
-@return	 Nil      
-@author     Thamara Villa 
+Devido ao fracionamento dos fontes, ï¿½ necessï¿½rio guardar o conteï¿½do da variï¿½vel estï¿½tica do
+array aTipo09 para passar para os outros fontes que compï¿½em o FATA600,
+evitando assim, a declaraï¿½ï¿½o de variï¿½veis Private.
+@sample     Ft600SetTipo09( )
+@param 		ExpA = Array com o conteï¿½do da variï¿½vel aTipo09
+@return	 Nil
+@author     Thamara Villa
 @since      13/01/2014
 @version    P12.1.7
 /*/
@@ -2177,7 +2177,7 @@ Return Nil
 
 //------------------------------------------------------------------------------
 /*/{Protheus.doc} Ft600TAddADZ
-Centraliza a inclusão dos gatilhos no model.
+Centraliza a inclusï¿½o dos gatilhos no model.
 @sample 	Ft600TAddADZ( oStruct, cMdlDetail )
 @param		oStruct		, Objeto	, Estrutura dos campos
 			cMdlDetail		, Caracter	, Nome do ModelGrid que o gatilho foi disparado.
@@ -2210,7 +2210,7 @@ Local aAux18	:= {}
 Local aAux19	:= {}
 Local aAux20	:= {}
 
-//Criação de Gatilhos para preencher os campos de Produto
+//Criaï¿½ï¿½o de Gatilhos para preencher os campos de Produto
 aAux1 := FwStruTrigger("ADZ_PRODUT" /*cDom*/,;
                        "ADZ_DESCRI" /*cCDom*/,;
                        "FT600Trigger('ADZ_PRODUT','ADZ_DESCRI','" + cMdlDetail + "')" /*cRegra*/,;
@@ -2222,7 +2222,7 @@ aAux1 := FwStruTrigger("ADZ_PRODUT" /*cDom*/,;
                        Nil /*cSequen*/)
 
 oStruct:AddTrigger(aAux1[1],aAux1[2],aAux1[3],aAux1[4])
- 
+
 aAux2 := FwStruTrigger("ADZ_PRODUT" /*cDom*/,;
                        "ADZ_UM"     /*cCDom*/,;
                        "FT600Trigger('ADZ_PRODUT','ADZ_UM','" + cMdlDetail + "')" /*cRegra*/,;
@@ -2345,7 +2345,7 @@ aAux12 := FwStruTrigger("ADZ_MOEDA"  /*cDom*/,;
 oStruct:AddTrigger(aAux12[1],aAux12[2],aAux12[3],aAux12[4])
 
 If	ADZ->(ColumnPos("ADZ_TABAGR")) > 0
-	// Quanto o campo ADZ_TABAGR existir no dicionário de dados, leva em consideração a regra de sua aplicação
+	// Quanto o campo ADZ_TABAGR existir no dicionï¿½rio de dados, leva em consideraï¿½ï¿½o a regra de sua aplicaï¿½ï¿½o
 	aAux13 := FwStruTrigger("ADZ_TABAGR" /*cDom*/,;
 	                        "ADZ_PRCTAB" /*cCDom*/,;
 	                        "FT600Trigger('ADZ_TABAGR','ADZ_PRCTAB','" + cMdlDetail + "')" /*cRegra*/,;
@@ -2451,13 +2451,13 @@ Return Nil
 //------------------------------------------------------------------------------
 /*/	{Protheus.doc} FATA600AGR
 
-Sobrescreve produtos do item da proposta com os produtos selecionados no 
+Sobrescreve produtos do item da proposta com os produtos selecionados no
 agrupador.
 
 @sample	FATA600AGR()
 
 @param	ExpO1 - ModelGrid dos Produtos da Oportunidade
-			
+
 @return	ExpA - Grid atualizada
 
 @author	Cleyton F.Alves
@@ -2472,30 +2472,30 @@ Local lDel			:= .F.
 
 ADZ->(dbSetOrder(3))
 ADZ->(dbSeek(cFilADZ+ADY->(ADY_PROPOS+ADY_PREVIS)))
-	
+
 WHile ADZ->(!Eof()) .AND. ADZ->ADZ_FILIAL == cFilADZ .AND. ADZ->ADZ_PROPOS == ADY->ADY_PROPOS .AND. ADZ->ADZ_REVISA == ADY->ADY_PREVIS
 
 	If oMdlADZ:SeekLine({{"R_E_C_N_O_" , ADZ->(Recno())}},.F.)
 		lDel := .F.
 	Else
 		lDel := .T.
-	EndIf	
-	
-	//Elimina os registros forçados na deleção da manipulação da grid
-	//antes do commit padrão do form, que ajustará a gravação da tabela.	
+	EndIf
+
+	//Elimina os registros forï¿½ados na deleï¿½ï¿½o da manipulaï¿½ï¿½o da grid
+	//antes do commit padrï¿½o do form, que ajustarï¿½ a gravaï¿½ï¿½o da tabela.
 	If lDel
 		RecLock("ADZ",.F.)
 		dbDelete()
 		MsUnLock()
 	EndIf
 	ADZ->(dbSkip())
-EndDo	
+EndDo
 
 Return()
 
 //-------------------------------------------------------------------
 /*/{Protheus.doc} AT600COrc
-Carga do Orçamento de Serviços
+Carga do Orï¿½amento de Serviï¿½os
 
 @author guilherme.pimentel
 @since 01/02/2017
@@ -2504,7 +2504,7 @@ Carga do Orçamento de Serviços
 //------------------------------------------------------------------
 Function AT600COrc()
 
-MsgRun(STR0378,STR0379,{|| At600SeAtu() })	//"Realizando carga do Orçamento" ## "Aguarde"
+MsgRun(STR0378,STR0379,{|| At600SeAtu() })	//"Realizando carga do Orï¿½amento" ## "Aguarde"
 
 Return Nil
 
@@ -2528,9 +2528,9 @@ Local lLoadModel	:= .T.
 Default oMdlProp := FwModelActive()
 
 If oMdlProp:GetId() == "FATA600"
-	
+
 	oMdlADY := oMdlProp:GetModel("ADYMASTER")
-	
+
 	If ( _oMdlOpor <> Nil .And. _oMdlOpor:GetId() == "FATA300" .And. _oMdlOpor:IsActive() .And. oMdlProp:IsActive() )
 		oMdlAD1 := _oMdlOpor:GetModel("AD1MASTER")
 		If ( oMdlAD1:GetValue("AD1_NROPOR") == oMdlADY:GetValue("ADY_OPORTU") .And.;
@@ -2538,7 +2538,7 @@ If oMdlProp:GetId() == "FATA600"
 			lLoadModel := .F.
 		EndIf
 	EndIf
-	
+
 	If lLoadModel
 		AD1->(DBSetOrder(1))
 		If AD1->(DBSeek(xFilial("AD1") + oMdlADY:GetValue("ADY_OPORTU") + oMdlADY:GetValue("ADY_REVISA")))
@@ -2555,7 +2555,7 @@ If oMdlProp:GetId() == "FATA600"
 			EndIf
 			_oMdlOpor:Activate()
 			FwModelActive(oMdlProp)
-			//Valida se o model da oportunidade está ativo.
+			//Valida se o model da oportunidade estï¿½ ativo.
 			If !_oMdlOpor:IsActive()
 				aError := _oMdlOpor:GetErrorMessage()
 				If !Empty(aError)
@@ -2564,23 +2564,23 @@ If oMdlProp:GetId() == "FATA600"
 			EndIf
 		EndIf
 	EndIf
-	
+
 EndIf
 Return(_oMdlOpor)
 
 //------------------------------------------------------------------------------
 /*/{Protheus.doc} FT600VldUser
-Retorna a validação de usuario no SX3
+Retorna a validaï¿½ï¿½o de usuario no SX3
 @sample 	FT600VldUser( cField )
 @param		cField	, caracter, Campo do SX3
 @Return   	cRet	, caracter, Valid do campo
 @author	Anderson Silva
-@since		18/03/2016 
+@since		18/03/2016
 @version	12.1.7
 /*/
 //------------------------------------------------------------------------------
 Static Function FT600VldUser( cField )
- 
+
 Local cRet := ".T."
 
 If !Empty( cField )
@@ -2598,13 +2598,13 @@ Retorna os status da proposta comercial no X3_CBOX.
 @param		Nenhum
 @Return   	cRet	, caracter, Status da proposta comercial.
 @author	Anderson Silva
-@since		18/03/2016 
+@since		18/03/2016
 @version	12.1.7
 /*/
 //------------------------------------------------------------------------------
 Function FT600CbxStatus()
 
-Local cCombo 			:= STR0353 //"A=Proposta em aberto;B=Proposta fechada;C=Proposta cancelada;D=Proposta não aprovada;E=Proposta Aprovada;F=Proposta bloqueada;G=Upload Pendente;H=Aguardando Analise;I=Contrato Gerado;J=Pedido de Venda Gerado;K=Nota Fiscal Gerada"
+Local cCombo 			:= STR0353 //"A=Proposta em aberto;B=Proposta fechada;C=Proposta cancelada;D=Proposta nï¿½o aprovada;E=Proposta Aprovada;F=Proposta bloqueada;G=Upload Pendente;H=Aguardando Analise;I=Contrato Gerado;J=Pedido de Venda Gerado;K=Nota Fiscal Gerada"
 Local lFT600NSta		:= ExistBlock("FT600NSTA")
 Local cRetStatus		:= ""
 
@@ -2622,10 +2622,10 @@ Return( cCombo )
 Legenda do comparador da Proposta Comercial
 @sample 	Ft600Inf()
 @param		Nenhum
-@Return   	lRet, lógico, .T.
+@Return   	lRet, lï¿½gico, .T.
 @author	CRM/Faturamento
 @since		30/09/2003
-@version	
+@version
 /*/
 //------------------------------------------------------------------------------
 Static Function Ft600Inf()
@@ -2643,9 +2643,9 @@ Local oBmp9
 Local oBmp10
 Local oBut1
 
-//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//³Cria tela com os bitmaps utilizados no tree para correta identificacao.³
-//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿
+//ï¿½Cria tela com os bitmaps utilizados no tree para correta identificacao.ï¿½
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 DEFINE MSDIALOG oDlg Title STR0075 Of oMainWnd Pixel From 0,0 To 175,550 //"Legenda"
 
@@ -2655,7 +2655,7 @@ DEFINE MSDIALOG oDlg Title STR0075 Of oMainWnd Pixel From 0,0 To 175,550 //"Lege
 @ 013,025 Say STR0001 + STR0084                         Of oDlg Pixel //"Proposta Comercial"###" - Modificada"
 
 @ 013,150 BITMAP oBmp2 RESNAME "BPMSEDT4"   SIZE 16,16 NOBORDER Pixel
-@ 013,165 Say STR0001 + STR0083                         Of oDlg Pixel //"Proposta Comercial"###" - Não Alterada"
+@ 013,165 Say STR0001 + STR0083                         Of oDlg Pixel //"Proposta Comercial"###" - Nï¿½o Alterada"
 
 @ 025,010 BITMAP oBmp3 RESNAME "EXCLUIR"    SIZE 16,16 NOBORDER Pixel
 @ 025,025 Say STR0085 + STR0081                         Of oDlg Pixel //"Produto"###" - Excluido"
@@ -2676,10 +2676,10 @@ DEFINE MSDIALOG oDlg Title STR0075 Of oMainWnd Pixel From 0,0 To 175,550 //"Lege
 @ 055,165 Say STR0086 + STR0082                         Of oDlg Pixel //"Acessorio"###" - Incluido"
 
 @ 073,010 BITMAP oBmp6 RESNAME "PMSTASK4"   SIZE 16,16 NOBORDER Pixel
-@ 073,025 Say STR0085 + STR0083                         Of oDlg Pixel //"Produto"###" - Não Alterado"
+@ 073,025 Say STR0085 + STR0083                         Of oDlg Pixel //"Produto"###" - Nï¿½o Alterado"
 
 @ 073,150 BITMAP oBmp10 RESNAME "PMSTASK2"  SIZE 16,16 NOBORDER Pixel
-@ 073,165 Say STR0086 + STR0083                         Of oDlg Pixel //"Acessorio"###" - Não Alterado"
+@ 073,165 Say STR0086 + STR0083                         Of oDlg Pixel //"Acessorio"###" - Nï¿½o Alterado"
 
 DEFINE SBUTTON oBut1 From 072,244 Type 1 ACTION (oDlg:End()) ENABLE Of oDlg
 Activate MSDIALOG oDlg Centered
@@ -2692,7 +2692,7 @@ Retorna array com cores e legendas da proposta comercial
 @param		Nenhum
 @Return   	aRet	, array, Dados da legenda
 @author	Eder Oliveira
-@since		04/04/2017 
+@since		04/04/2017
 @version	12.1.7
 /*/
 //------------------------------------------------------------------------------
@@ -2705,7 +2705,7 @@ Local aCoresNew	:= {}
 aRet 	:= {{'ADY->ADY_STATUS=="A"', 'BR_VERDE',    STR0184},;		//"Proposta em aberto"
     	    {'ADY->ADY_STATUS=="B"', 'BR_VERMELHO', STR0185},;		//"Proposta fechada"
     	    {'ADY->ADY_STATUS=="C"', 'BR_PRETO',    STR0186},;		//"Proposta cancelada"
-    	    {'ADY->ADY_STATUS=="D"', 'BR_AMARELO',  STR0187},;		//"Proposta não aprovada"
+    	    {'ADY->ADY_STATUS=="D"', 'BR_AMARELO',  STR0187},;		//"Proposta nï¿½o aprovada"
     	    {'ADY->ADY_STATUS=="E"', 'BLUE',        STR0032},;		//"Proposta Aprovada"
     	    {'ADY->ADY_STATUS=="F"', 'BR_CINZA',    STR0189},;		//"Proposta bloqueada"
     	    {'ADY->ADY_STATUS=="G"', 'BR_MARROM',   STR0348},;		//"Upload Pendente"
@@ -2713,10 +2713,10 @@ aRet 	:= {{'ADY->ADY_STATUS=="A"', 'BR_VERDE',    STR0184},;		//"Proposta em abe
     	    {'ADY->ADY_STATUS=="I"', 'PINK',        STR0350},;		//"Contrato Gerado"
     	    {'ADY->ADY_STATUS=="J"', 'WHITE',       STR0351},;		//"Pedido de Venda Gerado"
     	    {'ADY->ADY_STATUS=="K"', 'BR_VIOLETA',  STR0352}}		//"Nota Fiscal Gerada"
-		
-//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//³ Ponto de Entrada para alterar cores do Browse do Cadastro    ³
-//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿
+//ï¿½ Ponto de Entrada para alterar cores do Browse do Cadastro    ï¿½
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 If lFT600COR
 	aCoresNew := ExecBlock("FT600COR",.F.,.F.,{aRet})
 	If ValType( aCoresNew ) == "A"
@@ -2732,12 +2732,12 @@ Retorna array com cores e legendas da proposta comercial
 @param		oModel, Objeto, Modelo de dados da proposta
 			nTotal, Numerico, Valor total da proposta
 			xValor, Numerico, valor atual da linha posicionada
-			lSum, Lógico, Se verdadeiro soma xValor ao nTotal, se não, subtrai
-			cSubModel, Caracter, Id do submodelo (Produto/Acessório)
-			cTotalType, Caracter, Id do campo virtual de total (Produto ou Acessório)
+			lSum, Lï¿½gico, Se verdadeiro soma xValor ao nTotal, se nï¿½o, subtrai
+			cSubModel, Caracter, Id do submodelo (Produto/Acessï¿½rio)
+			cTotalType, Caracter, Id do campo virtual de total (Produto ou Acessï¿½rio)
 @Return   	nTotal, Numerico, Valor total da proposta
 @author	Squad CRM/Faturamento
-@since		30/05/2018 
+@since		30/05/2018
 @version	12.1.17+
 /*/
 //------------------------------------------------------------------------------
@@ -2746,7 +2746,7 @@ Static Function A600RdpTot( oModel, nTotal, xValor, lSum, cSubModel,cTotalType )
 	Local oMdlCalPrd  	:= oModel:GetModel("CALC")
 	Local nMoeda		:= Val( oModelADZ:GetValue('ADZ_MOEDA') )
 	Local nTotAtu	 	:= 0
-	
+
 	Default nTotal	   	:= 0
 	Default xValor		:= 0
 	Default lSum		:= .T.
@@ -2760,9 +2760,9 @@ Static Function A600RdpTot( oModel, nTotal, xValor, lSum, cSubModel,cTotalType )
 	EndIf
 
 	If lSum
-		nTotal := oMdlCalPrd:GetValue(cTotalType) + nTotAtu 
+		nTotal := oMdlCalPrd:GetValue(cTotalType) + nTotAtu
 	Else
-		nTotal := oMdlCalPrd:GetValue(cTotalType) - nTotAtu  
+		nTotal := oMdlCalPrd:GetValue(cTotalType) - nTotAtu
 	EndIf
 
 Return nTotal
