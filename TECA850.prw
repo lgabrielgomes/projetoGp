@@ -345,7 +345,8 @@ If	lProcessa
 																						     aProposta[oLbxProp:nAt,P_REVISA],;
 																						     aProposta[oLbxProp:nAt,P_OPORTU],;
 																						     aProposta[oLbxProp:nAt,P_DATA],;
-																						     X3Combo("ADY_TPCONT",aProposta[oLbxProp:nAt,P_TIPO])}},;
+																						     X3Combo("ADY_TPCONT",aProposta[oLbxProp:nAt,P_TIPO]),;
+																						     aProposta[oLbxProp:nAt,11]}},;
 															oLbxProp:Refresh()	)
 			@ 025,007 LISTBOX oLbxProp FIELDS HEADER	"",;
 															STR0018,;		//"Numero da Proposta"
@@ -353,13 +354,14 @@ If	lProcessa
 															STR0020,;		//"Oportunidade"
 															STR0024,;		//"Emissão"
 															STR0025,;		//"Tipo"
+															"Descr. Prop.",;
 															SIZE	(oPanel:nWidth/2)-20,;
 																	(((oPanel:nHeight/2)*0.90)-20) OF oPanel PIXEL;
 																	ON dblClick(aEval(aProposta,;
 																	  					{|x| x[P_MARCA]					:= .F.}),;
 																	  					aProposta[oLbxProp:nAt,P_MARCA]	:= .T.,;
 																	  					cCliProp							:= aProposta[oLbxProp:nAt,P_CLIENT],;
-																	  					cLjProp							:= aProposta[oLbxProp:nAt,P_LOJA],;
+																	  					cLjProp								:= aProposta[oLbxProp:nAt,P_LOJA],;
 																	  					cOporProp							:= aProposta[oLbxProp:nAt,P_OPORTU],;
 																						cCodProp							:= aProposta[oLbxProp:nAt,P_PROPOS],;
 																						cRevProp							:= aProposta[oLbxProp:nAt,P_REVISA],;
@@ -378,7 +380,8 @@ If	lProcessa
 										     aProposta[oLbxProp:nAt,P_REVISA],;
 										     aProposta[oLbxProp:nAt,P_OPORTU],;	
 										     aProposta[oLbxProp:nAt,P_DATA],;
-										     X3Combo("ADY_TPCONT",aProposta[oLbxProp:nAt,P_TIPO])}}
+										     X3Combo("ADY_TPCONT",aProposta[oLbxProp:nAt,P_TIPO]),;
+										     aProposta[oLbxProp:nAt,11]}}
 
 		oPanel			:= oWizard:GetPanel( ++ nPanelWz )	//Base de Atendimento
 		aBase			:= {{.F.,"","","",""}}
@@ -649,7 +652,7 @@ Local cNome 	:= ""
 DbSelectArea("ADY")
 DbSetOrder(1) //ADY_FILIAL+ADY_PROPOS
 
-cQuery :=	"SELECT AD1_FILIAL, AD1_DATA, AD1_STATUS, AD1_PROPOS, AD1_REVISA, AD1_CODCLI, AD1_LOJCLI, TFJ_CNTREC "
+cQuery :=	"SELECT AD1_FILIAL, AD1_DESCRI, AD1_DATA, AD1_STATUS, AD1_PROPOS, AD1_REVISA, AD1_CODCLI, AD1_LOJCLI, TFJ_CNTREC "
 cQuery +=   "FROM " + RetSqlName("AD1") + " AD1 "
 cQuery	+=         "INNER JOIN " + RetSqlName("ADY") + " ADY "
 cQuery +=                       "ON ADY.ADY_FILIAL = AD1.AD1_FILIAL "
@@ -687,7 +690,8 @@ While (cAliasAD1)->(! Eof())
 						cNome,;						// Nome do cliente
 						ADY->ADY_DATA,;				// Emissao
 						ADY->ADY_TPCONT,;			// Tipo de contrato
-						(cAliasAD1)->TFJ_CNTREC})	// Contrato Reccorente (1-Sim/2-Não)
+						(cAliasAD1)->TFJ_CNTREC,;	// Contrato Reccorente (1-Sim/2-Não)
+						(cAliasAD1)->AD1_DESCRI})	// Descrição da proposta
 	EndIf
 	(cAliasAD1)->(DbSkip())
 EndDo
@@ -695,7 +699,7 @@ EndDo
 
 //Se nao encontrou propostas, inicializa um array vazio
 If Len(aProp) == 0
-	aProp :={{.F.,"","","","","","","","",""}}
+	aProp :={{.F.,"","","","","","","","","",""}}
 EndIf
 RestArea(aArea)
 Return aProp
@@ -2373,7 +2377,7 @@ Configuração da alocação
 @return  .T. 
 /*/
 //--------------------------------------------------------------------------------------------------------------------
-Function At850CnfAlc(cContr,cLocal,aItemRH, cOrcSrv)
+Function At850CnfAlc(cContr,cLocal,aItemRH, cOrcSrv,,oDlg,oMeter)
 
 Local lRet			:= .T. 
 Local lReturn		:= .T.
@@ -2398,7 +2402,10 @@ Local cChvPesq      := ""
 Local lCntRec		:= .F.
 Local aTurnosSeq	:= {}
 Local nContTurno	:= 0
+
 Default cOrcSrv		:= ""
+Default oDlg := nil
+Default oMeter := nil
 
 If !Empty(cOrcSrv)
 	DbSelectArea("TFJ")
@@ -2547,7 +2554,17 @@ For nCont	:= 1 To Len(aItemRH)
 	EndIf
 	ABQ->(MsUnlock())
 
+	If isInCallStack("copyABQ") .AND. !isBlind() .AND. oMeter != nil .AND. oDlg != nil
+		oMeter:Set(nCont)
+		oMeter:Refresh()
+	EndIf
+		
 Next nCont
+
+If isInCallStack("copyABQ") .AND. !isBlind() .AND. oMeter != nil .AND. oDlg != nil
+	oDlg:End()
+EndIf
+
 RestArea(aArea)
 Return lRet
 

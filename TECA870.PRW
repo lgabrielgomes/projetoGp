@@ -1556,10 +1556,15 @@ BEGIN TRANSACTION
 		TFL->(DbSkip())
 	EndDo
 	
-
-	At870AtuGrp(cRevisa)
+	If lSemTela
+		At870AtuGrp(cRevisa)
+	else
+		MsgRun ( "Atualizando informações do grupo de faturamento", STR0004, {|| At870AtuGrp(cRevisa) } ) // "Atualizando informações do grupo de faturamento" ### "Aguarde..."
+	EndIf	
 	
-	CopyApont(cCodTfjAnt, cCodTFJ)//realiza cópia dos dados de apontamento para a revisão atual.
+	//CopyApont(cCodTfjAnt, cCodTFJ)//realiza cópia dos dados de apontamento para a revisão atual.
+	
+	AtuApont(cCodTfjAnt,cGesMat) // Atualiza a referência dos apontamentos de materiais de implantação e consumo
 	
 	CopyABQ(cCodTFJ)//realiza cópia dos dados de configuração de alocação para a revisão atual.
 	
@@ -1572,9 +1577,13 @@ BEGIN TRANSACTION
 	At870OsMont( cCodTFJAnt, cCodTFJ )
 	
 	At870FatAnt( cContra, cRevisa ) //Atualiza as informações do faturamento antecipado.
-
-	AtuDespAd(cCodTFJAnt, cCodTFJ) // Atualiza as informações de despesas adicionais
 	
+	If lSemTela
+		AtuDespAd(cCodTFJAnt, cCodTFJ) // Atualiza as informações de despesas adicionais
+	Else
+		MsgRun ( "Atualizando informações de despesas adicionais", STR0004, {|| AtuDespAd(cCodTFJAnt, cCodTFJ)  } ) // "Atualizando informações de despesas adicionais" ### "Aguarde..."
+	EndIf
+
 	At870RvRef(cCodTFJAnt) // Atualiza as informações de reforço
 
 	If !Empty(cGrpCom)
@@ -1730,6 +1739,12 @@ Local aItemRh		:= {}
 Local aArea		:= GetArea()
 Local aAreaTFF	:= TFF->(GetArea())
 Local lSeqTrn		:= (TFF->(FieldPos("TFF_SEQTRN"))>0)
+Local oDlg		:= nil
+Local oSayMtr	:= nil
+Local nMeter	:= 0
+Local nTotal	:= 0
+Local nTotLoc := 0
+Local nCntLoc := 0
 
 //Recupera locais de atendimento
 BeginSQL Alias cAliasQry       
@@ -1742,6 +1757,11 @@ WHERE
 EndSql
 
 TFF->(DbSetOrder(3))//TFF_FILIAL+TFF_CODPAI
+
+While (cAliasQry)->(!EOF())
+	nTotLoc++
+	(cAliasQry)->(DbSkip())
+End
 
 While (cAliasQry)->(!EOF())
 	
@@ -1767,7 +1787,18 @@ While (cAliasQry)->(!EOF())
 		TFF->(DbSkip())
 	EndDo
 	
-	At850CnfAlc((cAliasQry)->TFL_CONTRT, (cAliasQry)->TFL_LOCAL, aItemRH, cCodTFJ)//Gera ABQ
+	If isBlind()
+		At850CnfAlc((cAliasQry)->TFL_CONTRT, (cAliasQry)->TFL_LOCAL, aItemRH, cCodTFJ)//Gera ABQ
+	Else 
+		oDlg := nil
+		oSayMtr := nil
+		nMeter := 0
+		nTotal := LEN(aItemRH)
+		DEFINE MSDIALOG oDlg FROM 0,0 TO 5,60 TITLE STR0258 + " ( " + cValToChar(++nCntLoc) + " / " + cValToChar(nTotLoc) + " )" //"Atualizando configuração de alocação..."
+			oSayMtr := tSay():New(10,10,{||STR0257},oDlg,,,,,,.T.,,,220,20) //"Processando, aguarde..."
+			oMeter  := tMeter():New(20,10,{|u|if(Pcount()>0,nMeter:=u,nMeter)},nTotal,oDlg,220,10,,.T.,/*uParam10*/,/*uParam11*/,.T.)
+		ACTIVATE MSDIALOG oDlg CENTERED ON INIT (At850CnfAlc((cAliasQry)->TFL_CONTRT,(cAliasQry)->TFL_LOCAL,aItemRH,@oDlg,@oMeter))
+	EndIf 	
 	
 	(cAliasQry)->(DbSkip())
 EndDo
@@ -1802,6 +1833,10 @@ Local nI			:= 0
 Local aArea		:= GetArea()
 Local aAreaABB	:= ABB->(GetArea())
 Local aAreaABQ	:= ABQ->(GetArea())
+Local nTotal 	:= 0
+Local oDlg		:= nil
+Local oSayMtr	:= nil
+Local nMeter	:= 0
 
 BeginSql Alias cAliasABQ
 	SELECT 
@@ -1841,22 +1876,26 @@ BeginSql Alias cAliasABQ
 		ABQ.%notdel%
 EndSql
 
-
-//Busca relação entre configuração anterior e atual
 While (cAliasABQ)->(!EOF())
-
-	aAux := Array(3)		
-	aAux[1] := (cAliasABQ)->ABQ_CONTRT+(cAliasABQ)->ABQ_ITEM+(cAliasABQ)->ABQ_ORIGEM
-	aAux[2] := (cAliasABQ)->CONTRTSUB+(cAliasABQ)->ITEMSUB+(cAliasABQ)->ORIGEMSUB
-	aAux[3] := (cAliasABQ)->ABQ_TOTAL -(cAliasABQ)->ABQ_SALDO//consumido da configuração original
-	
-	aAdd(aInfo, aAux)
-	cIn += (cAliasABQ)->ABQ_CONTRT+(cAliasABQ)->ABQ_ITEM+(cAliasABQ)->ABQ_ORIGEM+","
-		
+	nTotal++
 	(cAliasABQ)->(DbSkip())
-EndDo
+End
+(cAliasABQ)->(DbGoTop())
 
-(cAliasABQ)->(DbCloseArea())
+If isBlind()
+	SumABQConf(cAliasABQ,@aInfo,@cIn)
+Else
+	DEFINE MSDIALOG oDlg FROM 0,0 TO 5,60 TITLE STR0259 //"Localizando configuração de alocação"
+		oSayMtr := tSay():New(10,10,{||STR0257},oDlg,,,,,,.T.,,,220,20) //"Processando, aguarde..."
+		oMeter  := tMeter():New(20,10,{|u|if(Pcount()>0,nMeter:=u,nMeter)},nTotal,oDlg,220,10,,.T.)
+		
+	ACTIVATE MSDIALOG oDlg CENTERED ON INIT (SumABQConf(cAliasABQ,@aInfo,@cIn,@oDlg,@oMeter))
+EndIf
+
+nTotal := 0
+oDlg := nil
+oSayMtr	:= nil
+nMeter	:= 0
 
 If !Empty(cIn)	
 	cIn := SubStr(cIn, 1, Len(cIn)-1)//Retira ultimo caracter
@@ -1873,37 +1912,39 @@ If !Empty(cIn)
 			ABB.%notdel%
 	EndSql
 	
-	//Realiza atuação da agenda do atendente
 	While (cAliasABB)->(!EOF())
-		nPos := aScan(aInfo, {|x| x[1] == (cAliasABB)->ABB_IDCFAL })//encontra registro substituido
-		If nPos > 0
+		nTotal++
+		(cAliasABB)->(DbSkip())
+	End
+	(cAliasABB)->(DbGoTop())
+
+	If isBlind()
+		UpdABBIdCf(cAliasABB, aInfo)
+	Else
+		DEFINE MSDIALOG oDlg FROM 0,0 TO 5,60 TITLE STR0260 //"Atualizando ID das alocações"
+			oSayMtr := tSay():New(10,10,{||STR0257},oDlg,,,,,,.T.,,,220,20) //"Processando, aguarde..."
+			oMeter  := tMeter():New(20,10,{|u|if(Pcount()>0,nMeter:=u,nMeter)},nTotal,oDlg,220,10,,.T.)
 			
-			//Atualiza ABB
-			ABB->(DbSetOrder(8))//ABB_FILIAL+ABB_CODIGO
-			If ABB->(DbSeek(xFilial("ABB")+(cAliasABB)->ABB_CODIGO))				
-				RecLock("ABB", .F.)
-				ABB->ABB_IDCFAL :=  aInfo[nPos][2]//Atualiza IDCFAL
-				MsUnlock()				
-			EndIf		
-		EndIf	
-		
-		(cAliasABB)->(DbSkip())	
-	EndDo
+		ACTIVATE MSDIALOG oDlg CENTERED ON INIT (UpdABBIdCf(cAliasABB, aInfo,@oDlg,@oMeter))
+	EndIf
 	
-	(cAliasABB)->(DbCloseArea())
+	nTotal := 0
+	oDlg := nil
+	oSayMtr	:= nil
+	nMeter	:= 0
+
 EndIf
 
-
-//Atualiza saldo da configuração de alocação
-For nI:=1 To Len(aInfo)
-	//Atualiza Saldo
-	ABQ->(DbSetOrder(1))//ABQ_FILIAL + ABQ_CONTRT + ABQ_ITEM + ABQ_ORIGEM
-	If ABQ->(DbSeek(xFilial("ABQ")+aInfo[nI][2]))
-		RecLock("ABQ", .F.)
-		ABQ->ABQ_SALDO := ABQ->ABQ_TOTAL - aInfo[nI][3]//Desconta o que já foi consumido na configuração anterior
-		MsUnlock()
-	EndIf
-Next nI
+nTotal := Len(aInfo)
+If isBlind()
+	UpdABQSald(aInfo)
+Else
+	DEFINE MSDIALOG oDlg FROM 0,0 TO 5,60 TITLE STR0261 //"Atualizando saldo de alocação"
+		oSayMtr := tSay():New(10,10,{||STR0257},oDlg,,,,,,.T.,,,220,20) //"Processando, aguarde..."
+		oMeter  := tMeter():New(20,10,{|u|if(Pcount()>0,nMeter:=u,nMeter)},nTotal,oDlg,220,10,,.T.)
+		
+	ACTIVATE MSDIALOG oDlg CENTERED ON INIT (UpdABQSald(aInfo,@oDlg,@oMeter))
+EndIf
 
 RestArea(aAreaABQ)
 RestArea(aAreaABB)
@@ -1933,6 +1974,7 @@ Local oAuxFrom	:= Nil
 Local cAliasQry	:= GetNextAlias()	
 Local aArea		:= GetArea()
 Local aAreaTFL	:= TFL->(GetArea())
+Local oDlg		:= nil
 
 BeginSQL Alias cAliasQry       
 	SELECT  TFL_CODIGO, TFL_CODSUB
@@ -3189,7 +3231,10 @@ Local cAliasTGZ := GetNextAlias()
 Local aCodTFF   := At870CodTFF(cCodTFJAnt)
 Local cSqlTFF   := ""
 Local nPosTFF   := 0
-
+Local nTotal 	:= 0
+Local oDlg		:= nil
+Local oSayMtr	:= nil
+Local nMeter	:= 0
 Local nI
 
 If Len(aCodTFF) > 0
@@ -3223,26 +3268,29 @@ If Len(aCodTFF) > 0
 
 	EndSql
 	
+	While (cAliasTGY)->(!Eof())
+		nTotal++
+		(cAliasTGY)->(dbSkip())
+	End
+	(cAliasTGY)->(dbGoTop())
+
 	dbSelectArea("TGY")	
 	TGY->(DbSetOrder(1)) //TGY_FILIAL+TGY_ESCALA+TGY_CODTDX+TGY_CODTFF+TGY_ITEM
 	
-	//Realiza a atualização das configurações do efetivo
-	While (cAliasTGY)->(!Eof())	
-		//Atualiza TGY
-		If TGY->( DbSeek( xFilial("TGY")+(cAliasTGY)->TGY_ESCALA+(cAliasTGY)->TGY_CODTDX+;
-						(cAliasTGY)->TGY_CODTFF+(cAliasTGY)->TGY_ITEM ) )
-										
-			nPosTFF := aScan( aCodTFF, { |x| x[1] == (cAliasTGY)->TGY_CODTFF } )
+	If isBlind()
+		UpdTGYxTFF(cAliasTGY, aCodTFF)
+	Else
+		DEFINE MSDIALOG oDlg FROM 0,0 TO 5,60 TITLE STR0262 //"Atualizando configuração de alocação"
+			oSayMtr := tSay():New(10,10,{||STR0257},oDlg,,,,,,.T.,,,220,20) //"Processando, aguarde..."
+			oMeter  := tMeter():New(20,10,{|u|if(Pcount()>0,nMeter:=u,nMeter)},nTotal,oDlg,220,10,,.T.)
 			
-			If nPosTFF > 0
-				RecLock("TGY", .F.)
-				TGY->TGY_CODTFF := aCodTFF[ nPosTFF, 2 ]
-				TGY->(msUnlock())
-			EndIf
-							
-		EndIf		
-		(cAliasTGY)->(DbSkip())	
-	EndDo
+		ACTIVATE MSDIALOG oDlg CENTERED ON INIT (UpdTGYxTFF(cAliasTGY, aCodTFF,@oDlg,@oMeter))
+	EndIf
+	
+	nTotal := 0
+	oDlg := nil
+	oSayMtr := nil
+	nMeter := 0
 	
 	// Verificar as configurações das coberturas
 	BeginSql Alias cAliasTGZ
@@ -3259,26 +3307,24 @@ If Len(aCodTFF) > 0
 	
 	EndSql
 	
+	While (cAliasTGZ)->(!Eof())
+		nTotal++
+		(cAliasTGZ)->(dbSkip())
+	End
+	(cAliasTGZ)->(dbGoTop())
+
 	dbSelectArea("TGZ")	
 	TGZ->(DbSetOrder(1))//TGZ_FILIAL+TGZ_ESCALA+TGZ_CODTDX+TGZ_CODTFF+TGZ_ITEM
 	
-	//Realiza a atualização das configurações do efetivo
-	While (cAliasTGZ)->(!Eof())	
-		//Atualiza TGZ
-		If TGZ->( DbSeek( xFilial("TGZ")+(cAliasTGZ)->TGZ_ESCALA+(cAliasTGZ)->TGZ_CODTDX+;
-						(cAliasTGZ)->TGZ_CODTFF+(cAliasTGZ)->TGZ_ITEM ) )
-						
-			nPosTFF := aScan( aCodTFF, { |x| x[1] == (cAliasTGZ)->TGZ_CODTFF } )
+	If IsBlind()
+		UpdTGZxTFF(cAliasTGZ, aCodTFF)
+	Else
+		DEFINE MSDIALOG oDlg FROM 0,0 TO 5,60 TITLE STR0263 //"Atualizando configuração de cobertura"
+			oSayMtr := tSay():New(10,10,{||STR0257},oDlg,,,,,,.T.,,,220,20) //"Processando, aguarde..."
+			oMeter  := tMeter():New(20,10,{|u|if(Pcount()>0,nMeter:=u,nMeter)},nTotal,oDlg,220,10,,.T.)
 			
-			If nPosTFF > 0										
-				RecLock("TGZ", .F.)
-				TGZ->TGZ_CODTFF := aCodTFF[ nPosTFF, 2 ]
-				TGZ->(msUnlock())	
-			EndIf			
-			
-		EndIf		
-		(cAliasTGZ)->(DbSkip())	
-	EndDo	
+		ACTIVATE MSDIALOG oDlg CENTERED ON INIT (UpdTGZxTFF(cAliasTGZ, aCodTFF,@oDlg,@oMeter))
+	EndIf
 
 	(cAliasTGY)->(dbCloseArea())
 	(cAliasTGZ)->(dbCloseArea())	
@@ -5823,6 +5869,10 @@ Local aAreaTFL 		:= TFL->(GetArea())
 Local aAreaTFI 		:= TFI->(GetArea())
 Local aAreaAB6 		:= AB6->(GetArea())
 Local aAreaTFF 		:= TFF->(GetArea())
+Local nTotal 	:= 0
+Local oDlg		:= nil
+Local oSayMtr	:= nil
+Local nMeter	:= 0
 
 BeginSQL Alias cQryAB6Alt
 	SELECT AB6.R_E_C_N_O_ AB6RECNO
@@ -5832,37 +5882,25 @@ BeginSQL Alias cQryAB6Alt
 		AND AB6.%NotDel%
 EndSQL
 
+While (cQryAB6Alt)->(!EOF())
+	nTotal++
+	(cQryAB6Alt)->(DbSkip())
+End
+
+(cQryAB6Alt)->(DbGoTop())
+
 TFF->(DbSetOrder( 1 ))  // TFF_FILIAL + TFF_COD
 TFI->(DbSetOrder( 1 ))  // TFI_FILIAL + TFI_COD
 
-While (cQryAB6Alt)->(!EOF())
-
-	AB6->( DbGoTo( (cQryAB6Alt)->AB6RECNO ) )
-
-	If AB6->AB6_ITORCS <> " "
-		If AB6->AB6_TPORCS == "2" .And. ;// item de Le
-			TFI->(DbSeek( xFilial("TFI")+AB6->AB6_ITORCS ))
-
-			cNewItem := TFI->TFI_CODSUB
-
-		ElseIf AB6->AB6_TPORCS == "3" .And. ;// item de Rh
-			TFF->(DbSeek( xFilial("TFF")+AB6->AB6_ITORCS ))
-			
-			cNewItem := TFF->TFF_CODSUB
-		EndIf
-	Else
-		cNewItem := ""
-	EndIf
-
-	Reclock("AB6",.F.)
-		AB6->AB6_CDORCS := cCodTFJ
-		If !Empty(cNewItem)
-			AB6->AB6_ITORCS := cNewItem
-		EndIF
-	AB6->(MsUnlock())
-
-	(cQryAB6Alt)->(DbSkip())
-End
+If isBlind()
+	UpdAB6xTFF(cQryAB6Alt)
+Else
+	DEFINE MSDIALOG oDlg FROM 0,0 TO 5,60 TITLE STR0264 //"Atualizando ordens de serviço"
+		oSayMtr := tSay():New(10,10,{||STR0257},oDlg,,,,,,.T.,,,220,20) //"Processando, aguarde..."
+		oMeter  := tMeter():New(20,10,{|u|if(Pcount()>0,nMeter:=u,nMeter)},nTotal,oDlg,220,10,,.T.)
+		
+	ACTIVATE MSDIALOG oDlg CENTERED ON INIT (UpdAB6xTFF(cQryAB6Alt,@oDlg,@oMeter))
+EndIf
 
 RestArea(aAreaTFF)
 RestArea(aAreaAB6)
@@ -6001,6 +6039,11 @@ Altera o número de revisão no faturamento antecipado.
 Static Function At870FatAnt( cNumCtr, cNewRev )
 Local aArea		:= GetArea()
 Local cNewAlias	:= GetNextAlias()
+Local nTotal 	:= 0
+Local oDlg		:= nil
+Local oSayMtr	:= nil
+Local nMeter	:= 0
+
 Default cNumCtr := ""
 Default cNewRev := ""
 
@@ -6014,17 +6057,25 @@ If !Empty(cNumCtr) .And. !Empty(cNewRev)
 			ABX.%notDel%
 	EndSql
 
+	While (cNewAlias)->(!EOF())
+		nTotal++
+		(cNewAlias)->(DbSkip())
+	End
+	
+	(cNewAlias)->(DbGoTop())
+
 	DbSelectArea("ABX")
 	ABX->(DbSetOrder(2)) //ABX_FILIAL+ABX_CONTRT+ABX_CONREV+ABX_CODPLA+ABX_MESANO
-	While (cNewAlias)->(!Eof())
-		If ABX->(DbSeek(xFilial("ABX")+(cNewAlias)->(ABX_CONTRT+ABX_CONREV)))
-			RecLock("ABX",.F.)
-				ABX->ABX_CONREV	:= cNewRev
-			ABX->(MsUnLock())
-		Endif
-		(cNewAlias)->(DbSkip())
-	EndDo
-	(cNewAlias)->(DbCloseArea())
+
+	If IsBlind()
+		UpdFatAnt(cNewAlias, cNewRev)
+	Else
+		DEFINE MSDIALOG oDlg FROM 0,0 TO 5,60 TITLE "Atualizando configuração de Faturamento Antecipado" //"Atualizando configuração de Faturamento Antecipado"
+			oSayMtr := tSay():New(10,10,{||STR0257},oDlg,,,,,,.T.,,,220,20) //"Processando, aguarde..."
+			oMeter  := tMeter():New(20,10,{|u|if(Pcount()>0,nMeter:=u,nMeter)},nTotal,oDlg,220,10,,.T.)
+			
+		ACTIVATE MSDIALOG oDlg CENTERED ON INIT (UpdFatAnt(cNewAlias, cNewRev ,@oDlg,@oMeter))
+	EndIf
 Endif
 
 RestArea(aArea)
@@ -6611,6 +6662,10 @@ Atualização das referencias da TW4 (TW4_CODTFF) para considerar os novos itens g
 Static Function At870RvRef(cCodTFJ)
 Local cQryTFFOld:= GetNextAlias()
 Local aArea		:= GetArea()
+Local nTotal 	:= 0
+Local oDlg		:= nil
+Local oSayMtr	:= nil
+Local nMeter	:= 0
 
 /************************************************************/
 /*  Seleciona o orçamento revisado.							*/
@@ -6639,25 +6694,578 @@ BeginSql Alias cQryTFFOld
 	
 EndSql
 
+While (cQryTFFOld)->(!EOF())
+	nTotal++
+	(cQryTFFOld)->(DbSkip())
+End
+
+(cQryTFFOld)->(DbGoTop())
+
 /************************************************************/
 /* Atualiza o codigo de referencia TW4_CODTFF.				*/
 /************************************************************/
 DbSelectArea("TW4")
 TW4->(DbSetOrder(3))// TW4_FILIAL+TW4_CODTFF
 
-While (cQryTFFOld)->(!Eof())
-	If TW4->( DbSeek( xFilial('TW4')+(cQryTFFOld)->TFF_COD ) )
-		RecLock("TW4", .F.)
-			TW4->TW4_CODTFF := (cQryTFFOld)->TFF_CODSUB
-		TW4->(MsUnLock())
-	Endif
-
-	(cQryTFFOld)->(DbSkip())	
-
-EndDo
+If IsBlind()
+	UpdRvRef(cQryTFFOld)
+Else
+	DEFINE MSDIALOG oDlg FROM 0,0 TO 5,60 TITLE STR0263 //"Atualizando configuração de cobertura"
+		oSayMtr := tSay():New(10,10,{||STR0257},oDlg,,,,,,.T.,,,220,20) //"Processando, aguarde..."
+		oMeter  := tMeter():New(20,10,{|u|if(Pcount()>0,nMeter:=u,nMeter)},nTotal,oDlg,220,10,,.T.)
+		
+	ACTIVATE MSDIALOG oDlg CENTERED ON INIT (UpdRvRef(cQryTFFOld,@oDlg,@oMeter))
+EndIf
 
 (cQryTFFOld)->(DbCloseArea())
 
 RestArea(aArea)
 
 Return .T.
+
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} SumABQConf
+@author Mateus Boiani
+@since 06/11/2019
+
+@description Realiza o processamento da função At870AtAlo com uma barra de load
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Static Function SumABQConf(cAliasABQ,aInfo,cIn,oDlg,oMeter)
+	Local aAux
+	Local nCount := 0
+	Local lLoadBar := .F.
+	
+	Default oDlg := nil
+	Default oMeter := nil
+	
+	lLoadBar := !isBlind() .AND. oMeter != nil .AND. oDlg != nil
+	
+	//Busca relação entre configuração anterior e atual
+	While (cAliasABQ)->(!EOF())
+		aAux := Array(3)
+		aAux[1] := (cAliasABQ)->ABQ_CONTRT+(cAliasABQ)->ABQ_ITEM+(cAliasABQ)->ABQ_ORIGEM
+		aAux[2] := (cAliasABQ)->CONTRTSUB+(cAliasABQ)->ITEMSUB+(cAliasABQ)->ORIGEMSUB
+		aAux[3] := (cAliasABQ)->ABQ_TOTAL -(cAliasABQ)->ABQ_SALDO//consumido da configuração original
+	
+		aAdd(aInfo, aAux)
+		cIn += (cAliasABQ)->ABQ_CONTRT+(cAliasABQ)->ABQ_ITEM+(cAliasABQ)->ABQ_ORIGEM+","
+		If lLoadBar
+			oMeter:Set(++nCount)
+			oMeter:Refresh()
+		EndIf
+		(cAliasABQ)->(DbSkip())
+	EndDo
+	If lLoadBar
+		oDlg:End()
+	EndIf
+	
+	(cAliasABQ)->(DbCloseArea())
+	
+	RETURN
+
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} UpdABBIdCf
+@author Mateus Boiani
+@since 06/11/2019
+
+@description Realiza o processamento da função At870AtAlo com uma barra de load
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Static Function UpdABBIdCf(cAliasABB, aInfo, oDlg, oMeter)
+	Local nPos
+	Local nCount := 0
+	Local lLoadBar := .F.
+	
+	Default oDlg := nil
+	Default oMeter := nil
+	
+	lLoadBar := !isBlind() .AND. oMeter != nil .AND. oDlg != nil
+	
+	//Realiza atuação da agenda do atendente
+	While (cAliasABB)->(!EOF())
+		nPos := aScan(aInfo, {|x| x[1] == (cAliasABB)->ABB_IDCFAL })//encontra registro substituido
+		If nPos > 0
+	
+			//Atualiza ABB
+			ABB->(DbSetOrder(8))//ABB_FILIAL+ABB_CODIGO
+			If ABB->(DbSeek(xFilial("ABB")+(cAliasABB)->ABB_CODIGO))
+				RecLock("ABB", .F.)
+				ABB->ABB_IDCFAL :=  aInfo[nPos][2]//Atualiza IDCFAL
+				MsUnlock()
+			EndIf
+		EndIf
+		If lLoadBar
+			oMeter:Set(++nCount)
+			oMeter:Refresh()
+		EndIf
+		(cAliasABB)->(DbSkip())
+	EndDo
+	If lLoadBar
+		oDlg:End()
+	EndIf
+	(cAliasABB)->(DbCloseArea())
+	Return
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} UpdABQSald
+@author Mateus Boiani
+@since 06/11/2019
+	
+@description Realiza o processamento da função At870AtAlo com uma barra de load
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Static Function UpdABQSald(aInfo,oDlg,oMeter)
+	Local nCount := 0
+	Local nI
+	Local lLoadBar := .F.
+	
+	Default oDlg := nil
+	Default oMeter := nil
+	
+	lLoadBar := !isBlind() .AND. oMeter != nil .AND. oDlg != nil
+	
+	//Atualiza saldo da configuração de alocação
+	For nI:=1 To Len(aInfo)
+		//Atualiza Saldo
+		ABQ->(DbSetOrder(1))//ABQ_FILIAL + ABQ_CONTRT + ABQ_ITEM + ABQ_ORIGEM
+		If ABQ->(DbSeek(xFilial("ABQ")+aInfo[nI][2]))
+			RecLock("ABQ", .F.)
+			ABQ->ABQ_SALDO := ABQ->ABQ_TOTAL - aInfo[nI][3]//Desconta o que já foi consumido na configuração anterior
+			MsUnlock()
+		EndIf
+		If lLoadBar
+			oMeter:Set(++nCount)
+			oMeter:Refresh()
+		EndIf
+	Next nI
+	If lLoadBar
+		oDlg:End()
+	EndIf
+Return	
+
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} UpdTGYxTFF
+@author Mateus Boiani
+@since 06/11/2019
+
+@description Realiza o processamento da função At870AtGES com uma barra de load
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Static Function UpdTGYxTFF(cAliasTGY, aCodTFF,oDlg,oMeter)
+	Local nPosTFF
+	Local nCount := 0
+	Local lLoadBar := .F.
+	
+	Default oDlg := nil
+	Default oMeter := nil
+	
+	lLoadBar := !isBlind() .AND. oMeter != nil .AND. oDlg != nil
+	
+	//Realiza a atualização das configurações do efetivo
+	While (cAliasTGY)->(!Eof())
+		//Atualiza TGY
+		If TGY->( DbSeek( xFilial("TGY")+(cAliasTGY)->TGY_ESCALA+(cAliasTGY)->TGY_CODTDX+;
+						(cAliasTGY)->TGY_CODTFF+(cAliasTGY)->TGY_ITEM ) )
+	
+			nPosTFF := aScan( aCodTFF, { |x| x[1] == (cAliasTGY)->TGY_CODTFF } )
+	
+			If nPosTFF > 0
+				RecLock("TGY", .F.)
+				TGY->TGY_CODTFF := aCodTFF[ nPosTFF, 2 ]
+				TGY->(msUnlock())
+			EndIf
+	
+		EndIf
+		If lLoadBar
+			oMeter:Set(++nCount)
+			oMeter:Refresh()
+		EndIf
+		(cAliasTGY)->(DbSkip())
+	EndDo
+	If lLoadBar
+		oDlg:End()
+	EndIf
+Return
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} UpdTGZxTFF
+@author Mateus Boiani
+@since 06/11/2019
+	
+@description Realiza o processamento da função At870AtGES com uma barra de load
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Static Function UpdTGZxTFF(cAliasTGZ, aCodTFF,oDlg,oMeter)
+	Local nPosTFF
+	Local nCount := 0
+	Local lLoadBar := .F.
+	
+	Default oDlg := nil
+	Default oMeter := nil
+	
+	lLoadBar := !isBlind() .AND. oMeter != nil .AND. oDlg != nil
+	
+	//Realiza a atualização das configurações do efetivo
+	While (cAliasTGZ)->(!Eof())
+		//Atualiza TGZ
+		If TGZ->( DbSeek( xFilial("TGZ")+(cAliasTGZ)->TGZ_ESCALA+(cAliasTGZ)->TGZ_CODTDX+;
+						(cAliasTGZ)->TGZ_CODTFF+(cAliasTGZ)->TGZ_ITEM ) )
+	
+			nPosTFF := aScan( aCodTFF, { |x| x[1] == (cAliasTGZ)->TGZ_CODTFF } )
+	
+			If nPosTFF > 0
+				RecLock("TGZ", .F.)
+				TGZ->TGZ_CODTFF := aCodTFF[ nPosTFF, 2 ]
+				TGZ->(msUnlock())
+			EndIf
+	
+		EndIf
+		If lLoadBar
+			oMeter:Set(++nCount)
+			oMeter:Refresh()
+		EndIf
+		(cAliasTGZ)->(DbSkip())
+	EndDo
+	If lLoadBar
+		oDlg:End()
+	EndIf
+Return
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} UpdAB6xTFF
+@author Mateus Boiani
+@since 06/11/2019
+	
+@description Realiza o processamento da função At870OsMont com uma barra de load
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Static Function UpdAB6xTFF(cQryAB6Alt,oDlg,oMeter)
+	Local cNewItem := ""
+	Local nCount := 0
+	Local lLoadBar := .F.
+	
+	Default oDlg := nil
+	Default oMeter := nil
+	
+	lLoadBar := !isBlind() .AND. oMeter != nil .AND. oDlg != nil
+	
+	While (cQryAB6Alt)->(!EOF())
+	
+		AB6->( DbGoTo( (cQryAB6Alt)->AB6RECNO ) )
+	
+		If AB6->AB6_ITORCS <> " "
+			If AB6->AB6_TPORCS == "2" .And. ;// item de Le
+				TFI->(DbSeek( xFilial("TFI")+AB6->AB6_ITORCS ))
+	
+				cNewItem := TFI->TFI_CODSUB
+	
+			ElseIf AB6->AB6_TPORCS == "3" .And. ;// item de Rh
+				TFF->(DbSeek( xFilial("TFF")+AB6->AB6_ITORCS ))
+	
+				cNewItem := TFF->TFF_CODSUB
+			EndIf
+		Else
+			cNewItem := ""
+		EndIf
+	
+		Reclock("AB6",.F.)
+			AB6->AB6_CDORCS := cCodTFJ
+			If !Empty(cNewItem)
+				AB6->AB6_ITORCS := cNewItem
+			EndIF
+		AB6->(MsUnlock())
+		If lLoadBar
+			oMeter:Set(++nCount)
+			oMeter:Refresh()
+		EndIf
+		(cQryAB6Alt)->(DbSkip())
+	End
+	If lLoadBar
+		oDlg:End()
+	EndIf
+	
+Return
+
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} UpdAB6xTFF
+@author Mateus Boiani
+@since 06/11/2019
+	
+@description Realiza o processamento da função At870OsMont com uma barra de load
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Static Function UpdFatAnt(cNewAlias,cNewRev,oDlg,oMeter)
+	Local nCount := 0
+	Local lLoadBar := .F.
+	
+	Default oDlg := nil
+	Default oMeter := nil
+	
+	lLoadBar := !isBlind() .AND. oMeter != nil .AND. oDlg != nil
+	
+	While (cNewAlias)->(!Eof())
+		If ABX->(DbSeek(xFilial("ABX")+(cNewAlias)->(ABX_CONTRT+ABX_CONREV)))
+			RecLock("ABX",.F.)
+				ABX->ABX_CONREV	:= cNewRev
+			ABX->(MsUnLock())
+		Endif
+		(cNewAlias)->(DbSkip())
+	EndDo
+	(cNewAlias)->(DbCloseArea())
+
+	If lLoadBar
+		oDlg:End()
+	EndIf
+	
+Return
+
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} UpdAB6xTFF
+@author Mateus Boiani
+@since 06/11/2019
+	
+@description Realiza o processamento da função At870OsMont com uma barra de load
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Static Function UpdRvRef(cQryTFFOld,oDlg,oMeter)
+	Local nCount := 0
+	Local lLoadBar := .F.
+	
+	Default oDlg := nil
+	Default oMeter := nil
+	
+	lLoadBar := !isBlind() .AND. oMeter != nil .AND. oDlg != nil
+	
+	While (cQryTFFOld)->(!Eof())
+		If TW4->( DbSeek( xFilial('TW4')+(cQryTFFOld)->TFF_COD ) )
+			RecLock("TW4", .F.)
+				TW4->TW4_CODTFF := (cQryTFFOld)->TFF_CODSUB
+			TW4->(MsUnLock())
+		Endif
+	
+		(cQryTFFOld)->(DbSkip())	
+	
+	EndDo
+
+	If lLoadBar
+		oDlg:End()
+	EndIf
+	
+Return
+
+//--------------------------------------------------------------------------------------------------------------------
+/*/{Protheus.doc} AtuApont
+@author Diego Bezerra
+@since 17/10/2019
+@version 12.1.25
+@param cGesMat, String, tipo de apontamento de materiais
+@param cCodTFJ, String, Codigo do orçamento de serviços
+@description Atualiza a referência dos apontamentos de materiais de implantação e consumo 
+/*/
+//--------------------------------------------------------------------------------------------------------------------
+Static Function AtuApont(cCodTFJ, cGesMat)
+
+	Local cAliasTFL := GetNextAlias()
+	Local aArea		:= GetArea()
+	Local aAreaTFL	:= TFL->(GetArea())
+	Local cQry		:= ""
+	Local oDlg		:= nil
+	Local oSayMtr	:= nil
+	Local nMeter	:= 0
+	Local nTotal	:= 0
+	
+	cQry := "SELECT TFL_CODIGO, TFL_CODSUB, TFL_CONTRT, TFL_CONREV FROM " + retSqlName("TFL") + " TFL "
+	cQry += "WHERE TFL.TFL_FILIAL = '" + xFilial("TFL") + "' AND "
+	cQry += "TFL.TFL_CODPAI = '" + cCodTFJ + "' AND "
+	cqry += "TFL.D_E_L_E_T_ = ' '" 
+	
+	cQry := ChangeQuery(cQry)
+	dbUseArea( .T., "TOPCONN", TCGENQRY(,,cQry),cAliasTFL, .F., .T.)
+	
+	While (cAliasTFL)->(!EOF())
+		nTotal++
+		(cAliasTFL)->(dbSkip())
+	End
+	
+	(cAliasTFL)->(DbGoTop())
+	
+	If  Empty (cGesMat) .or. cGesMat $ "1|4|5"
+		If isBlind()
+			AtAptMat(cAliasTFL,cCodTFJ, cGesMat)
+		Else
+			DEFINE MSDIALOG oDlg FROM 0,0 TO 5,60 TITLE STR0266 //"Atualizando apontamentos por item"
+				oSayMtr := tSay():New(10,10,{||STR0257},oDlg,,,,,,.T.,,,220,20) //"Processando, aguarde..."
+				oMeter  := tMeter():New(20,10,{|u|if(Pcount()>0,nMeter:=u,nMeter)},nTotal,oDlg,220,10,,.T.)
+				
+			ACTIVATE MSDIALOG oDlg CENTERED ON INIT (AtAptMat(cAliasTFL,cCodTFJ, cGesMat,@oDlg,@oMeter))
+		EndIf
+	EndIf
+	
+	nMeter := 0
+	oDlg := nil
+	oSayMtr := nil
+	
+	(cAliasTFL)->(DbGoTop())
+		
+	If Empty (cGesMat) .or. cGesMat $ "2|4|5"
+		If isBlind()
+			AtAptTGU(cAliasTFL,cCodTFJ, cGesMat)
+		Else
+			DEFINE MSDIALOG oDlg FROM 0,0 TO 5,60 TITLE STR0267 //"Atualizando apontamentos por valor"
+				oSayMtr := tSay():New(10,10,{||STR0257},oDlg,,,,,,.T.,,,220,20) //"Processando, aguarde..."
+				oMeter  := tMeter():New(20,10,{|u|if(Pcount()>0,nMeter:=u,nMeter)},nTotal,oDlg,220,10,,.T.)
+				
+			ACTIVATE MSDIALOG oDlg CENTERED ON INIT (AtAptTGU(cAliasTFL,cCodTFJ, cGesMat,@oDlg,@oMeter))
+		EndIf
+	EndIf
+	
+	(cAliasTFL)->(dbCloseArea())
+	RestArea(aAreaTFL)
+	RestArea(aArea)
+	Return
+	//--------------------------------------------------------------------------------------------------------------------
+	/*/{Protheus.doc} AtAptMat
+	@author Mateus Boiani
+	@since 06/11/2019
+	
+	@description Realiza o processamento da função AtuApont com uma barra de load
+	/*/
+	//--------------------------------------------------------------------------------------------------------------------
+	Static Function AtAptMat(cAliasTFL,cCodTFJ, cGesMat, oDlg ,oMeter)
+	Local cQry		:= ""
+	Local cAliasTFG := GetNextAlias()
+	Local cAliasTFH	:= GetNextAlias()
+	Local cAliasTFS	:= GetNextAlias()
+	Local cAliasTFT	:= GetNextAlias()
+	Local nCount := 0
+	Local lLoadBar := .F.
+	
+	Default oDlg := nil
+	Default oMeter := nil
+	
+	lLoadBar := !isBlind() .AND. oMeter != nil .AND. oDlg != nil
+	
+	While (cAliasTFL)->(!EOF())
+		// DADOS DOS MATERIAIS DE IMPLANTAÇÃO
+		cQry := "SELECT TFG_COD, TFG_CODSUB FROM " + retSqlName("TFG") + " TFG "
+		cQry += "WHERE TFG.TFG_CONTRT = '" + (cAliasTFL)->TFL_CONTRT + "' "
+		cQry += "AND TFG.TFG_CONREV = '"  + (cAliasTFL)->TFL_CONREV + "' "
+		cQry += "AND TFG.TFG_FILIAL = '" + xFilial("TFG") + "' "
+		cQry += "AND TFG.D_E_L_E_T_ = ' '"
+		cQry := ChangeQuery(cQry)
+		dbUseArea( .T., "TOPCONN", TCGENQRY(,,cQry),cAliasTFG, .F., .T.)
+		
+		// DADOS DOS MATERIAIS DE CONSUMO
+		cQry := "SELECT TFH_COD, TFH_CODSUB FROM " + retSqlName("TFH") + " TFH "
+		cQry += "WHERE TFH.TFH_CONTRT = '" + (cAliasTFL)->TFL_CONTRT + "' "
+		cQry += "AND TFH.TFH_CONREV = '"  + (cAliasTFL)->TFL_CONREV + "' "
+		cQry += "AND TFH.TFH_FILIAL = '" + xFilial("TFH") + "' "
+		cQry += "AND TFH.D_E_L_E_T_ = ' '"
+		cQry := ChangeQuery(cQry)
+		dbUseArea( .T., "TOPCONN", TCGENQRY(,,cQry),cAliasTFH, .F., .T.)
+		
+		While (cAliasTFG)->(!EOF())
+		
+			// DADOS DOS APONTAMENTOS DE MATERIAIS DE IMPLANTAÇÃO
+			cQry := "SELECT R_E_C_N_O_ as REC FROM " + retSqlName("TFS") + " TFS "
+			cQry += "WHERE TFS.TFS_CODTFG = '" + (cAliasTFG)->TFG_COD + "' "
+			cQry += "AND TFS.TFS_FILIAL ='" + xFilial("TFS") + "' "
+			cQry += "AND TFS.D_E_L_E_T_ = ' '"
+			cQry := ChangeQuery(cQry)
+			dbUseArea( .T., "TOPCONN", TCGENQRY(,,cQry),cAliasTFS, .F., .T.)
+			
+			While (cAliasTFS)->(!EOF())
+				// Atualizando os dados dos apontamentos de materiais de implantação
+				TFS->(DbGoTo((cAliasTFS)->REC))
+				TFS->(RecLock("TFS", .F.))
+				TFS->TFS_CODTFG := (cAliasTFG)->TFG_CODSUB
+				TFS->TFS_CODTFL := (cAliasTFL)->TFL_CODSUB
+				TFS->(MsUnlock())
+				
+				(cAliasTFS)->(dbSkip())
+			End
+			(cAliasTFG)->(dbSkip())
+			(cAliasTFS)->(dbCloseArea())
+		End
+		(cAliasTFG)->(dbCloseArea())
+		
+		While (cAliasTFH)->(!EOF())
+			
+			// DADOS DOS APONTAMENTOS DE MATERIAIS DE CONSUMO
+			cQry := "SELECT R_E_C_N_O_ as REC FROM " + retSqlName("TFT") + " TFT "
+			cQry += "WHERE TFT.TFT_CODTFH = '" + (cAliasTFH)->TFH_COD + "' "
+			cQry += "AND TFT.TFT_FILIAL ='" + xFilial("TFT")+"' "
+			cQry += "AND TFT.D_E_L_E_T_ = ' '"
+			cQry := ChangeQuery(cQry)
+			dbUseArea( .T., "TOPCONN", TCGENQRY(,,cQry),cAliasTFT, .F., .T.)
+			
+			While (cAliasTFT)->(!EOF())
+				// Atualizando os dados dos apontamentos de materiais de consumo
+				TFT->(DbGoTo((cAliasTFT)->REC))
+				TFT->(RecLock("TFT", .F.))
+				TFT->TFT_CODTFH := (cAliasTFH)->TFH_CODSUB
+				TFT->TFT_CODTFL := (cAliasTFL)->TFL_CODSUB
+				TFT->(MsUnlock())			
+				
+				(cAliasTFT)->(dbSkip())
+			End
+			(cAliasTFH)->(dbSkip())
+			(cAliasTFT)->(dbCloseArea())
+		End
+		(cAliasTFH)->(dbCloseArea())
+		
+		(cAliasTFL)->(dbSkip())
+		If lLoadBar
+			oMeter:Set(++nCount)
+			oMeter:Refresh()
+		EndIf
+	End
+	If lLoadBar
+		oDlg:End()
+	EndIf
+	Return
+	//--------------------------------------------------------------------------------------------------------------------
+	/*/{Protheus.doc} AtAptMat
+	@author Mateus Boiani
+	@since 06/11/2019
+	
+	@description Realiza o processamento da função AtuApont com uma barra de load
+	/*/
+	//--------------------------------------------------------------------------------------------------------------------
+	Static Function AtAptTGU(cAliasTFL,cCodTFJ, cGesMat,oDlg,oMeter)
+	Local cQry := ""
+	Local cAliasTGU := GetNextAlias()
+	Local nCount := 0
+	Local lLoadBar := .F.
+	
+	Default oDlg := nil
+	Default oMeter := nil
+	
+	lLoadBar := !isBlind() .AND. oMeter != nil .AND. oDlg != nil
+	
+	While (cAliasTFL)->(!EOF())
+		// DADOS DOS APONTAMENTOS DE MATERIAIS DE POR VALOR
+		cQry := "SELECT R_E_C_N_O_ as REC FROM "+retSqlName("TGU")+" TGU "
+		cQry += "WHERE TGU.TGU_CODTFL = '"+(cAliasTFL)->TFL_CODIGO+"' "
+		cQry += "AND TGU.TGU_FILIAL ='"+xFilial("TGU")+"' "
+		cQry += "AND TGU.D_E_L_E_T_ = ' '"
+		cQry := ChangeQuery(cQry)
+		dbUseArea( .T., "TOPCONN", TCGENQRY(,,cQry),cAliasTGU, .F., .T.)
+		
+		While (cAliasTGU)->(!EOF())
+			TGU->(DbGoTo((cAliasTGU)->REC))
+			TGU->(RecLock("TGU", .F.))
+			TGU->TGU_CODTFL := (cAliasTFL)->TFL_CODSUB
+			TGU->(MsUnlock())
+			
+			(caliasTGU)->(dbSkip())
+		End
+		(cAliasTGU)->(dbCloseArea())
+		(cAliasTFL)->(dbSkip())
+		If lLoadBar
+			oMeter:Set(++nCount)
+			oMeter:Refresh()
+		EndIf
+	End
+	If lLoadBar
+		oDlg:End()
+	EndIf
+	Return
