@@ -1557,7 +1557,7 @@ BEGIN TRANSACTION
 	EndDo
 	
 	If lSemTela
-		At870AtuGrp(cRevisa)
+		At870AtuGrp(cRevisa) //Atualizando grupo de faturamento
 	else
 		MsgRun ( "Atualizando informações do grupo de faturamento", STR0004, {|| At870AtuGrp(cRevisa) } ) // "Atualizando informações do grupo de faturamento" ### "Aguarde..."
 	EndIf	
