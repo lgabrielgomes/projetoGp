@@ -1557,14 +1557,16 @@ BEGIN TRANSACTION
 	EndDo
 	
 	If lSemTela
-		At870AtuGrp(cRevisa)
+		At870AtuGrp(cRevisa) //Atualizando grupo de faturamento
 	else
 		MsgRun ( "Atualizando informações do grupo de faturamento", STR0004, {|| At870AtuGrp(cRevisa) } ) // "Atualizando informações do grupo de faturamento" ### "Aguarde..."
 	EndIf	
 	
-	//CopyApont(cCodTfjAnt, cCodTFJ)//realiza cópia dos dados de apontamento para a revisão atual.
-	
-	AtuApont(cCodTfjAnt,cGesMat) // Atualiza a referência dos apontamentos de materiais de implantação e consumo
+	If lSemTela
+		CopyApont(cCodTfjAnt, cCodTFJ) //realiza cópia dos dados de apontamento para a revisão atual.
+	Else 
+		MsgRun ( "Atualizando informações do apontamento de material", STR0004, {|| CopyApont(cCodTfjAnt, cCodTFJ) } ) // "Atualizando informações do grupo de faturamento" ### "Aguarde..."
+	EndIf
 	
 	CopyABQ(cCodTFJ)//realiza cópia dos dados de configuração de alocação para a revisão atual.
 	
@@ -5893,13 +5895,13 @@ TFF->(DbSetOrder( 1 ))  // TFF_FILIAL + TFF_COD
 TFI->(DbSetOrder( 1 ))  // TFI_FILIAL + TFI_COD
 
 If isBlind()
-	UpdAB6xTFF(cQryAB6Alt)
+	UpdAB6xTFF(cQryAB6Alt,cCodTFJ)	
 Else
 	DEFINE MSDIALOG oDlg FROM 0,0 TO 5,60 TITLE STR0264 //"Atualizando ordens de serviço"
 		oSayMtr := tSay():New(10,10,{||STR0257},oDlg,,,,,,.T.,,,220,20) //"Processando, aguarde..."
 		oMeter  := tMeter():New(20,10,{|u|if(Pcount()>0,nMeter:=u,nMeter)},nTotal,oDlg,220,10,,.T.)
 		
-	ACTIVATE MSDIALOG oDlg CENTERED ON INIT (UpdAB6xTFF(cQryAB6Alt,@oDlg,@oMeter))
+	ACTIVATE MSDIALOG oDlg CENTERED ON INIT (UpdAB6xTFF(cQryAB6Alt,cCodTFJ,@oDlg,@oMeter))
 EndIf
 
 RestArea(aAreaTFF)
@@ -6937,7 +6939,7 @@ Return
 @description Realiza o processamento da função At870OsMont com uma barra de load
 /*/
 //--------------------------------------------------------------------------------------------------------------------
-Static Function UpdAB6xTFF(cQryAB6Alt,oDlg,oMeter)
+Static Function UpdAB6xTFF(cQryAB6Alt,cCodTFJ,oDlg,oMeter)
 	Local cNewItem := ""
 	Local nCount := 0
 	Local lLoadBar := .F.
@@ -7050,222 +7052,3 @@ Static Function UpdRvRef(cQryTFFOld,oDlg,oMeter)
 	EndIf
 	
 Return
-
-//--------------------------------------------------------------------------------------------------------------------
-/*/{Protheus.doc} AtuApont
-@author Diego Bezerra
-@since 17/10/2019
-@version 12.1.25
-@param cGesMat, String, tipo de apontamento de materiais
-@param cCodTFJ, String, Codigo do orçamento de serviços
-@description Atualiza a referência dos apontamentos de materiais de implantação e consumo 
-/*/
-//--------------------------------------------------------------------------------------------------------------------
-Static Function AtuApont(cCodTFJ, cGesMat)
-
-	Local cAliasTFL := GetNextAlias()
-	Local aArea		:= GetArea()
-	Local aAreaTFL	:= TFL->(GetArea())
-	Local cQry		:= ""
-	Local oDlg		:= nil
-	Local oSayMtr	:= nil
-	Local nMeter	:= 0
-	Local nTotal	:= 0
-	
-	cQry := "SELECT TFL_CODIGO, TFL_CODSUB, TFL_CONTRT, TFL_CONREV FROM " + retSqlName("TFL") + " TFL "
-	cQry += "WHERE TFL.TFL_FILIAL = '" + xFilial("TFL") + "' AND "
-	cQry += "TFL.TFL_CODPAI = '" + cCodTFJ + "' AND "
-	cqry += "TFL.D_E_L_E_T_ = ' '" 
-	
-	cQry := ChangeQuery(cQry)
-	dbUseArea( .T., "TOPCONN", TCGENQRY(,,cQry),cAliasTFL, .F., .T.)
-	
-	While (cAliasTFL)->(!EOF())
-		nTotal++
-		(cAliasTFL)->(dbSkip())
-	End
-	
-	(cAliasTFL)->(DbGoTop())
-	
-	If  Empty (cGesMat) .or. cGesMat $ "1|4|5"
-		If isBlind()
-			AtAptMat(cAliasTFL,cCodTFJ, cGesMat)
-		Else
-			DEFINE MSDIALOG oDlg FROM 0,0 TO 5,60 TITLE STR0266 //"Atualizando apontamentos por item"
-				oSayMtr := tSay():New(10,10,{||STR0257},oDlg,,,,,,.T.,,,220,20) //"Processando, aguarde..."
-				oMeter  := tMeter():New(20,10,{|u|if(Pcount()>0,nMeter:=u,nMeter)},nTotal,oDlg,220,10,,.T.)
-				
-			ACTIVATE MSDIALOG oDlg CENTERED ON INIT (AtAptMat(cAliasTFL,cCodTFJ, cGesMat,@oDlg,@oMeter))
-		EndIf
-	EndIf
-	
-	nMeter := 0
-	oDlg := nil
-	oSayMtr := nil
-	
-	(cAliasTFL)->(DbGoTop())
-		
-	If Empty (cGesMat) .or. cGesMat $ "2|4|5"
-		If isBlind()
-			AtAptTGU(cAliasTFL,cCodTFJ, cGesMat)
-		Else
-			DEFINE MSDIALOG oDlg FROM 0,0 TO 5,60 TITLE STR0267 //"Atualizando apontamentos por valor"
-				oSayMtr := tSay():New(10,10,{||STR0257},oDlg,,,,,,.T.,,,220,20) //"Processando, aguarde..."
-				oMeter  := tMeter():New(20,10,{|u|if(Pcount()>0,nMeter:=u,nMeter)},nTotal,oDlg,220,10,,.T.)
-				
-			ACTIVATE MSDIALOG oDlg CENTERED ON INIT (AtAptTGU(cAliasTFL,cCodTFJ, cGesMat,@oDlg,@oMeter))
-		EndIf
-	EndIf
-	
-	(cAliasTFL)->(dbCloseArea())
-	RestArea(aAreaTFL)
-	RestArea(aArea)
-	Return
-	//--------------------------------------------------------------------------------------------------------------------
-	/*/{Protheus.doc} AtAptMat
-	@author Mateus Boiani
-	@since 06/11/2019
-	
-	@description Realiza o processamento da função AtuApont com uma barra de load
-	/*/
-	//--------------------------------------------------------------------------------------------------------------------
-	Static Function AtAptMat(cAliasTFL,cCodTFJ, cGesMat, oDlg ,oMeter)
-	Local cQry		:= ""
-	Local cAliasTFG := GetNextAlias()
-	Local cAliasTFH	:= GetNextAlias()
-	Local cAliasTFS	:= GetNextAlias()
-	Local cAliasTFT	:= GetNextAlias()
-	Local nCount := 0
-	Local lLoadBar := .F.
-	
-	Default oDlg := nil
-	Default oMeter := nil
-	
-	lLoadBar := !isBlind() .AND. oMeter != nil .AND. oDlg != nil
-	
-	While (cAliasTFL)->(!EOF())
-		// DADOS DOS MATERIAIS DE IMPLANTAÇÃO
-		cQry := "SELECT TFG_COD, TFG_CODSUB FROM " + retSqlName("TFG") + " TFG "
-		cQry += "WHERE TFG.TFG_CONTRT = '" + (cAliasTFL)->TFL_CONTRT + "' "
-		cQry += "AND TFG.TFG_CONREV = '"  + (cAliasTFL)->TFL_CONREV + "' "
-		cQry += "AND TFG.TFG_FILIAL = '" + xFilial("TFG") + "' "
-		cQry += "AND TFG.D_E_L_E_T_ = ' '"
-		cQry := ChangeQuery(cQry)
-		dbUseArea( .T., "TOPCONN", TCGENQRY(,,cQry),cAliasTFG, .F., .T.)
-		
-		// DADOS DOS MATERIAIS DE CONSUMO
-		cQry := "SELECT TFH_COD, TFH_CODSUB FROM " + retSqlName("TFH") + " TFH "
-		cQry += "WHERE TFH.TFH_CONTRT = '" + (cAliasTFL)->TFL_CONTRT + "' "
-		cQry += "AND TFH.TFH_CONREV = '"  + (cAliasTFL)->TFL_CONREV + "' "
-		cQry += "AND TFH.TFH_FILIAL = '" + xFilial("TFH") + "' "
-		cQry += "AND TFH.D_E_L_E_T_ = ' '"
-		cQry := ChangeQuery(cQry)
-		dbUseArea( .T., "TOPCONN", TCGENQRY(,,cQry),cAliasTFH, .F., .T.)
-		
-		While (cAliasTFG)->(!EOF())
-		
-			// DADOS DOS APONTAMENTOS DE MATERIAIS DE IMPLANTAÇÃO
-			cQry := "SELECT R_E_C_N_O_ as REC FROM " + retSqlName("TFS") + " TFS "
-			cQry += "WHERE TFS.TFS_CODTFG = '" + (cAliasTFG)->TFG_COD + "' "
-			cQry += "AND TFS.TFS_FILIAL ='" + xFilial("TFS") + "' "
-			cQry += "AND TFS.D_E_L_E_T_ = ' '"
-			cQry := ChangeQuery(cQry)
-			dbUseArea( .T., "TOPCONN", TCGENQRY(,,cQry),cAliasTFS, .F., .T.)
-			
-			While (cAliasTFS)->(!EOF())
-				// Atualizando os dados dos apontamentos de materiais de implantação
-				TFS->(DbGoTo((cAliasTFS)->REC))
-				TFS->(RecLock("TFS", .F.))
-				TFS->TFS_CODTFG := (cAliasTFG)->TFG_CODSUB
-				TFS->TFS_CODTFL := (cAliasTFL)->TFL_CODSUB
-				TFS->(MsUnlock())
-				
-				(cAliasTFS)->(dbSkip())
-			End
-			(cAliasTFG)->(dbSkip())
-			(cAliasTFS)->(dbCloseArea())
-		End
-		(cAliasTFG)->(dbCloseArea())
-		
-		While (cAliasTFH)->(!EOF())
-			
-			// DADOS DOS APONTAMENTOS DE MATERIAIS DE CONSUMO
-			cQry := "SELECT R_E_C_N_O_ as REC FROM " + retSqlName("TFT") + " TFT "
-			cQry += "WHERE TFT.TFT_CODTFH = '" + (cAliasTFH)->TFH_COD + "' "
-			cQry += "AND TFT.TFT_FILIAL ='" + xFilial("TFT")+"' "
-			cQry += "AND TFT.D_E_L_E_T_ = ' '"
-			cQry := ChangeQuery(cQry)
-			dbUseArea( .T., "TOPCONN", TCGENQRY(,,cQry),cAliasTFT, .F., .T.)
-			
-			While (cAliasTFT)->(!EOF())
-				// Atualizando os dados dos apontamentos de materiais de consumo
-				TFT->(DbGoTo((cAliasTFT)->REC))
-				TFT->(RecLock("TFT", .F.))
-				TFT->TFT_CODTFH := (cAliasTFH)->TFH_CODSUB
-				TFT->TFT_CODTFL := (cAliasTFL)->TFL_CODSUB
-				TFT->(MsUnlock())			
-				
-				(cAliasTFT)->(dbSkip())
-			End
-			(cAliasTFH)->(dbSkip())
-			(cAliasTFT)->(dbCloseArea())
-		End
-		(cAliasTFH)->(dbCloseArea())
-		
-		(cAliasTFL)->(dbSkip())
-		If lLoadBar
-			oMeter:Set(++nCount)
-			oMeter:Refresh()
-		EndIf
-	End
-	If lLoadBar
-		oDlg:End()
-	EndIf
-	Return
-	//--------------------------------------------------------------------------------------------------------------------
-	/*/{Protheus.doc} AtAptMat
-	@author Mateus Boiani
-	@since 06/11/2019
-	
-	@description Realiza o processamento da função AtuApont com uma barra de load
-	/*/
-	//--------------------------------------------------------------------------------------------------------------------
-	Static Function AtAptTGU(cAliasTFL,cCodTFJ, cGesMat,oDlg,oMeter)
-	Local cQry := ""
-	Local cAliasTGU := GetNextAlias()
-	Local nCount := 0
-	Local lLoadBar := .F.
-	
-	Default oDlg := nil
-	Default oMeter := nil
-	
-	lLoadBar := !isBlind() .AND. oMeter != nil .AND. oDlg != nil
-	
-	While (cAliasTFL)->(!EOF())
-		// DADOS DOS APONTAMENTOS DE MATERIAIS DE POR VALOR
-		cQry := "SELECT R_E_C_N_O_ as REC FROM "+retSqlName("TGU")+" TGU "
-		cQry += "WHERE TGU.TGU_CODTFL = '"+(cAliasTFL)->TFL_CODIGO+"' "
-		cQry += "AND TGU.TGU_FILIAL ='"+xFilial("TGU")+"' "
-		cQry += "AND TGU.D_E_L_E_T_ = ' '"
-		cQry := ChangeQuery(cQry)
-		dbUseArea( .T., "TOPCONN", TCGENQRY(,,cQry),cAliasTGU, .F., .T.)
-		
-		While (cAliasTGU)->(!EOF())
-			TGU->(DbGoTo((cAliasTGU)->REC))
-			TGU->(RecLock("TGU", .F.))
-			TGU->TGU_CODTFL := (cAliasTFL)->TFL_CODSUB
-			TGU->(MsUnlock())
-			
-			(caliasTGU)->(dbSkip())
-		End
-		(cAliasTGU)->(dbCloseArea())
-		(cAliasTFL)->(dbSkip())
-		If lLoadBar
-			oMeter:Set(++nCount)
-			oMeter:Refresh()
-		EndIf
-	End
-	If lLoadBar
-		oDlg:End()
-	EndIf
-	Return

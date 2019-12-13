@@ -4,11 +4,18 @@
 		{
 			"type": "totvs_language_debug",
 			"request": "launch",
-			"name": "Totvs Language Debug",
-			"program": "${command:AskForProgramName}",
-			"cwb": "${workspaceFolder}",
-			"smartclientBin": "C:/totvs/bin/smartclient/smartclient.exe",
+			"cwb": "${workspaceRoot}",
+			"name": "Smart Client release 12.1.23",
+			"smartclientBin": "C:\\Protheus\\Protheus12_1_25\\bin\\SmartClient\\smartclient.exe",
+			"program": "SIGAADV",
+			"programArguments": "",
+			"enableMultiThread": false,
+			"enableProfile": false,
 			"isMultiSession": true,
+			"isAccessibilityMode": false,
+			"doNotShowSplash": false,
+			"language": "",
+			"ignoreFiles": true,
 			"enableTableSync": true
 		}
 	]

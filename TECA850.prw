@@ -2377,7 +2377,7 @@ Configuração da alocação
 @return  .T. 
 /*/
 //--------------------------------------------------------------------------------------------------------------------
-Function At850CnfAlc(cContr,cLocal,aItemRH, cOrcSrv,,oDlg,oMeter)
+Function At850CnfAlc(cContr,cLocal,aItemRH, cOrcSrv,oDlg,oMeter)
 
 Local lRet			:= .T. 
 Local lReturn		:= .T.
