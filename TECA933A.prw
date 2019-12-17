@@ -63,7 +63,7 @@ Static Function ModelDef()
 	AddFieldMD(@oStrCN9,aCampo)
 	
 	aCampo := {}
-	aCampo := {STR0009, STR0009,'_CLIENT','C', 50, 0,Nil, Nil, Nil, .F.,Nil, Nil, Nil, .T.} //'Cliente'
+	aCampo := {STR0009, STR0009,'_CLIENT','C', TamSX3('A1_NREDUZ')[1], 0,Nil, Nil, Nil, .F.,Nil, Nil, Nil, .T.} //'Cliente'
 	AddFieldMD(@oStrCN9,aCampo)
 	
 	aCampo := {}
