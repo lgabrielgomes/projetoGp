@@ -11,7 +11,6 @@ Rotina para faturamento do dissidio antes de efetuar a revisão para ajuste de va
 @version 1.0
 /*/
 //-------------------------------------------------------------------
-
 Function TECA933 ()
 	Local oMBrowse := NIL
 	
@@ -205,6 +204,9 @@ Static Function ModelDef()
 	oStrTX0:AddTrigger( aAux[1], aAux[2], aAux[3], aAux[4])
 	
 	aAux := FwStruTrigger( "TX1_PERCEN", "TX1_PERCEN", "A933Vlr()", .F. )
+	oStrTX1:AddTrigger( aAux[1], aAux[2], aAux[3], aAux[4])
+	//aqui pam
+	aAux := FwStruTrigger( "TX1_VLDISS", "TX1_VLDISS", "A933Per()", .F. )
 	oStrTX1:AddTrigger( aAux[1], aAux[2], aAux[3], aAux[4])
 		
 	oModel := MPFormModel():New('TECA933M',/*bPreVld*/, /*bPosVld*/,{|oModel| A933Comt(oModel)} ) 
@@ -562,6 +564,33 @@ Function A933Vlr()
 	Local nVlrContr	:= oMdlTX1:GetValue("TX1_VLCONT")
 	
 	oMdlTX1:SetValue("TX1_VLDISS", (nVlrContr*nPerc)/100)
+	
+	If	oView:IsActive()
+		oView:Refresh()
+	EndIf
+
+Return
+
+//------------------------------------------------------------------------------
+/*/{Protheus.doc} A933Per
+@description	Gatilho para atualizar os percentuais dissidio
+@sample	 		A933Per()
+@author 		Pâmela Bernardo
+@since 			17/05/2018
+@version 		1.0
+/*/
+//------------------------------------------------------------------------------
+Function A933Per()
+
+	Local oMdl		:= FwModelActive()
+	Local oView		:= FwViewActive()
+	Local oMdlTX0	:= oMdl:GetModel("TX0MASTER")
+	Local oMdlTX1	:= oMdl:GetModel("TX1DETAIL")
+	Local nPerc		:= 0 //oMdlTX1:GetValue("TX1_PERCEN")
+	Local nVlrContr	:= oMdlTX1:GetValue("TX1_VLCONT")
+	Local nVlrDig	:= oMdlTX1:GetValue("TX1_VLDISS")
+	
+	oMdlTX1:SetValue("TX1_PERCEN", Round(Round((nVlrDig*100)/nVlrContr,3),2))
 	
 	If	oView:IsActive()
 		oView:Refresh()
