@@ -11,6 +11,7 @@ Rotina para faturamento do dissidio antes de efetuar a revisão para ajuste de va
 @version 1.0
 /*/
 //-------------------------------------------------------------------
+
 Function TECA933 ()
 	Local oMBrowse := NIL
 	
@@ -797,6 +798,7 @@ Static Function A933GerPD(aPedido)
 	Local aItem 	:= {}
 	Local lA933Ped	:=  ExistBlock("A933Ped")//ponto de entrada para complemento de pedido	
 	Local cItem := ""
+	Local aPed	:= {}
 	
 	For nX := 1 to len(aPedido)
 	
@@ -833,10 +835,12 @@ Static Function A933GerPD(aPedido)
 		
 		
 		If lA933Ped
-			ExecBlock("A933Ped",.F.,.F.,{aPedido[nX][5],aPedido[nX][8],aPedido[nX][6], aCabec, aItens})
+			aPed:= ExecBlock("A933Ped",.F.,.F.,{aPedido[nX][5],aPedido[nX][8],aPedido[nX][6], aCabec, aItens})
+		Else
+			aPed := {aCabec,aItens}
 		EndIf
 		lMsErroAuto := .F.
-		MsExecAuto({|x,y,z| MATA410(x,y,z)},aCabec,aItens,3 )
+		MsExecAuto({|x,y,z| MATA410(x,y,z)},aPed[1],aPed[2],3 )
 		
 		If lMsErroAuto
 			MostraErro()
