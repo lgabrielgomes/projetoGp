@@ -1198,7 +1198,7 @@ Begin Transaction
 							If !oMdlTFL:IsDeleted() .And. dDtFimCtr < oMdlTFL:GetValue( "TFL_DTFIM")
 								dDtFimCtr := oMdlTFL:GetValue("TFL_DTFIM")
 							EndIf
-							If ABS->( DbSeek(xFilial("ABS") + oMdlTFL:GetValue("TFL_LOCAL") ))
+							If ABS->( DbSeek(xFilial("ABS") + oMdlTFL:GetValue("TFL_LOCAL") )) .And. !Empty(ABS->ABS_CLIFAT) .And. !Empty(ABS->ABS_LJFAT)
 								If !(oMdlCNC:SeekLine( {{"CNC_CLIENT", ABS->ABS_CLIFAT }, {"CNC_LOJACL", ABS->ABS_LJFAT }} ))
 									
 									oMdlCNC:Addline()
